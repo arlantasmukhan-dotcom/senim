@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SENIM — полиграф для ответов ИИ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23111827'/><path d='M3 17h6l3-8 4 15 3-11 2 4h8' fill='none' stroke='%2334d399' stroke-width='2.5' stroke-linejoin='round' stroke-linecap='round'/></svg>">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><path d="M3 17h6l3-8 4 15 3-11 2 4h8"/></svg>
+      <div>
+        <div class="name">SENIM <span class="kz">сенім</span></div>
+        <div class="tagline" data-i18n="tagline"></div>
+      </div>
+    </div>
+    <div class="top-right">
+      <div id="health" class="health"></div>
+      <div class="lang" role="group" aria-label="Language">
+        <button data-lang="kk">KZ</button><button data-lang="ru">RU</button><button data-lang="en">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="card input-card">
+      <label class="field-label" for="answer" data-i18n="answerLabel"></label>
+      <textarea id="answer" rows="7" data-i18n-placeholder="answerPlaceholder"></textarea>
+      <div class="row">
+        <div class="field grow">
+          <label class="field-label" for="question" data-i18n="questionLabel"></label>
+          <input id="question" type="text">
+        </div>
+        <div class="field">
+          <label class="field-label" for="author" data-i18n="authorLabel"></label>
+          <select id="author"></select>
+        </div>
+      </div>
+      <div class="row actions">
+        <div class="mode" role="radiogroup">
+          <button class="seg" data-mode="quick" role="radio"><span data-i18n="modeQuick"></span><small data-i18n="modeQuickHint"></small></button>
+          <button class="seg" data-mode="deep" role="radio"><span data-i18n="modeDeep"></span><small data-i18n="modeDeepHint"></small></button>
+        </div>
+        <div class="buttons">
+          <button id="example" class="ghost" data-i18n="example"></button>
+          <button id="run" class="primary" data-i18n="run"></button>
+        </div>
+      </div>
+      <div id="error" class="error" hidden></div>
+    </section>
+
+    <section id="results" class="results" hidden>
+      <div class="card answer-card">
+        <div class="card-head">
+          <h2 data-i18n="answerHeading"></h2>
+          <div id="progress" class="progress"></div>
+        </div>
+        <div id="legend" class="legend"></div>
+        <div id="answerView" class="answer-view"></div>
+        <div id="unlocated" class="unlocated"></div>
+        <div id="citations" class="citations"></div>
+      </div>
+      <aside class="card polygraph" id="polygraph">
+        <p class="hint" data-i18n="selectHint"></p>
+      </aside>
+    </section>
+    <footer id="footer" class="footer"></footer>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+id,lang,claim,label,source_url,notes
+kt001,ru,Абай Кунанбаев родился в 1845 году.,true,https://ru.wikipedia.org/wiki/Абай_Кунанбаев,
+kt002,ru,Абай Кунанбаев родился в 1847 году.,false,https://ru.wikipedia.org/wiki/Абай_Кунанбаев,mutated year (1845)
+kt003,kk,Абай 1904 жылы қайтыс болды.,true,https://kk.wikipedia.org/wiki/Абай_Құнанбайұлы,
+kt004,ru,Абай Кунанбаев умер в 1910 году.,false,https://ru.wikipedia.org/wiki/Абай_Кунанбаев,mutated year (1904)
+kt005,ru,Столица Казахстана была перенесена из Алматы в Акмолу в 1997 году.,true,https://ru.wikipedia.org/wiki/Астана,
+kt006,ru,Столица Казахстана была перенесена из Алматы в Акмолу в 2001 году.,false,https://ru.wikipedia.org/wiki/Астана,mutated year (1997)
+kt007,kk,Қазақстан тәуелсіздігін 1991 жылы 16 желтоқсанда жариялады.,true,https://kk.wikipedia.org/wiki/Қазақстан,
+kt008,kk,Қазақстан тәуелсіздігін 1991 жылы 25 желтоқсанда жариялады.,false,https://kk.wikipedia.org/wiki/Қазақстан,mutated date (16 December)
+kt009,ru,"Западная часть озера Балхаш пресная, а восточная — солёная.",true,https://ru.wikipedia.org/wiki/Балхаш_(озеро),
+kt010,ru,"Западная часть озера Балхаш солёная, а восточная — пресная.",false,https://ru.wikipedia.org/wiki/Балхаш_(озеро),swapped
+kt011,ru,Хан-Тенгри — самая высокая точка Казахстана.,true,https://ru.wikipedia.org/wiki/Хан-Тенгри,
+kt012,en,Kazakhstan is the largest landlocked country in the world.,true,https://en.wikipedia.org/wiki/Landlocked_country,
+kt013,en,Kazakhstan is the second-largest landlocked country in the world.,false,https://en.wikipedia.org/wiki/Landlocked_country,mutated rank
+kt014,ru,Город Байконур расположен в Кызылординской области.,true,https://ru.wikipedia.org/wiki/Байконур,
+kt015,ru,Юрий Гагарин стартовал в космос с Байконура в 1961 году.,true,https://ru.wikipedia.org/wiki/Восток-1,
+kt016,ru,Юрий Гагарин стартовал в космос с Байконура в 1963 году.,false,https://ru.wikipedia.org/wiki/Восток-1,mutated year (1961)
+kt017,ru,Семипалатинский ядерный полигон был закрыт в 1991 году.,true,https://ru.wikipedia.org/wiki/Семипалатинский_испытательный_ядерный_полигон,
+kt018,ru,Семипалатинский ядерный полигон был закрыт в 1989 году.,false,https://ru.wikipedia.org/wiki/Семипалатинский_испытательный_ядерный_полигон,mutated year (1991)
+kt019,en,Al-Farabi was born in the 9th century.,true,https://en.wikipedia.org/wiki/Al-Farabi,
+kt020,en,Al-Farabi was born in the 11th century.,false,https://en.wikipedia.org/wiki/Al-Farabi,mutated century
