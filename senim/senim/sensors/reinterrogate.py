@@ -20,6 +20,8 @@ WITNESS_SYSTEM = (
 CLASSIFY_SYSTEM = """Compare each ANSWER with the CLAIM. For each answer output:
 "agree" if it states the same key fact, "contradict" if it states a different value for the same fact,
 "unsure" if it says it does not know or does not address the fact.
+Judge the MEANING, not the wording: paraphrases and synonyms agree (e.g. "salty" and "bitter/brackish" water,
+"the capital moved" and "the capital was transferred"). Answers may be in Kazakh, Russian or English.
 Reply with ONLY JSON: {"relations": ["agree|contradict|unsure", ...]} in the same order as the answers."""
 
 _REFUSAL = re.compile(
@@ -32,6 +34,9 @@ _REFUSAL = re.compile(
 )
 
 
+_CENTURY = re.compile(r"век|ғасыр|centur|\b[IVXL]+\b", re.I)
+
+
 def is_refusal(answer: str) -> bool:
     return bool(_REFUSAL.search(answer or ""))
 
@@ -39,14 +44,18 @@ def is_refusal(answer: str) -> bool:
 def numeric_relation(claim_answer: str, witness_answer: str) -> str | None:
     """Deterministic comparison when the key fact is a number/date. None = cannot decide numerically."""
     wanted = numbers(claim_answer)
-    if not wanted:
-        return None
+    if not wanted or _CENTURY.search(claim_answer):
+        return None               # "9th century" vs "born around 870": not comparable digit-by-digit
     if is_refusal(witness_answer):
         return "unsure"
     got = numbers(witness_answer)
     if not got:
         return None
-    return "agree" if wanted & got else "contradict"
+    if wanted <= got:
+        return "agree"            # every key number of the claim is there (extra ones like the day are fine)
+    if got - wanted:
+        return "contradict"       # e.g. claim "1991, 25 Dec" vs witness "1991, 16 Dec"
+    return None                   # partial answer (only "1991"): let the classifier decide
 
 
 def summarize(answers: list[WitnessAnswer]) -> ReinterrogationResult:
@@ -58,14 +67,14 @@ def summarize(answers: list[WitnessAnswer]) -> ReinterrogationResult:
     return res
 
 
-async def _ask(model: str, question: str, phrasing: int) -> WitnessAnswer | None:
+async def _ask(model: str, question: str, phrasing: int) -> WitnessAnswer | llm.LLMError:
     try:
         reply = await llm.chat(model, [
             {"role": "system", "content": WITNESS_SYSTEM},
             {"role": "user", "content": question},
-        ], temperature=0.7, max_tokens=300)
-    except llm.LLMError:
-        return None
+        ], temperature=0.7, max_tokens=1000)  # headroom: some models spend tokens on hidden reasoning
+    except llm.LLMError as e:
+        return e
     return WitnessAnswer(model=model, phrasing=phrasing, answer=reply.strip()[:400])
 
 
@@ -79,9 +88,11 @@ async def run(claim: Claim) -> ReinterrogationResult:
 
     phrasings = [claim.question, claim.question_alt or claim.question]
     jobs = [_ask(m, q, i + 1) for m in settings.witnesses for i, q in enumerate(phrasings)]
-    answers = [a for a in await asyncio.gather(*jobs) if a is not None]
+    replies = await asyncio.gather(*jobs)
+    answers = [a for a in replies if isinstance(a, WitnessAnswer)]
+    failures = [str(a) for a in replies if isinstance(a, llm.LLMError)]
     if not answers:
-        return ReinterrogationResult(status="error", note="no witness model answered")
+        return ReinterrogationResult(status="error", note="no witness answered: " + "; ".join(failures[:2]))
 
     undecided = []
     for a in answers:
@@ -105,4 +116,7 @@ async def run(claim: Claim) -> ReinterrogationResult:
         for a, rel in zip(undecided, rels):
             if rel in ("agree", "contradict", "unsure"):
                 a.relation = rel
-    return summarize(answers)
+    res = summarize(answers)
+    if failures:
+        res.note = f"{len(failures)} of {len(replies)} witness calls failed: {failures[0][:120]}"
+    return res

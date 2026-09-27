@@ -34,7 +34,8 @@ TIER3_SUFFIXES = (
 )
 
 TIER4_LOW = (
-    "reddit.com", "quora.com", "otvet.mail.ru", "pikabu.ru", "vk.com", "facebook.com",
+    "reddit.com", "quora.com", "otvet.mail.ru", "pikabu.ru", "vk.com", "vk.ru", "ok.ru", "dzen.ru",
+    "facebook.com", "threads.net", "pinterest.com", "livejournal.com",
     "instagram.com", "tiktok.com", "youtube.com", "t.me", "x.com", "twitter.com",
     "fandom.com", "medium.com", "znanija.com", "brainly.com",
 )

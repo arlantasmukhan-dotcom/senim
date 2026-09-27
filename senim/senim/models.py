@@ -64,7 +64,8 @@ class AlibiResult(BaseModel):
     backend: str = ""                    # "tavily" or "wikipedia"
     queries: list[str] = Field(default_factory=list)
     evidence: list[Evidence] = Field(default_factory=list)
-    rejected_quotes: int = 0
+    rejected_quotes: int = 0             # quote not found on the page (Quote-Lock)
+    weak_quotes: int = 0                 # quote is real but does not contain the number/date at stake
     support_domains: list[str] = Field(default_factory=list)
     contradict_domains: list[str] = Field(default_factory=list)
     contradict_tier12: bool = False
@@ -99,6 +100,7 @@ class PhantomResult(BaseModel):
     fake_entity: str = ""
     twin_question: str = ""
     nonexistence_verified: bool = False
+    verified_by: str = ""                # "wikipedia" or "web" (Tavily exact-name search)
     target_model: str = ""
     answers: list[PhantomAnswer] = Field(default_factory=list)
     bluff: float = 0.0

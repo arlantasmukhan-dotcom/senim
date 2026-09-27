@@ -68,3 +68,34 @@ def test_trained_weights_file_is_loaded(tmp_path, monkeypatch):
     monkeypatch.setenv("SENIM_WEIGHTS", str(path))
     w, source = scoring.load_weights()
     assert w["bias"] == -9.0 and w["support"] == scoring.DEFAULT_WEIGHTS["support"] and source == "KazTruth test"
+
+
+def test_weak_site_cannot_overrule_trusted_support():
+    alibi = AlibiResult(evidence=[ev("supports"), ev("contradicts", "https://someblog.kz/x", tier=4)],
+                        support_domains=["wikipedia.org"], contradict_domains=["someblog.kz"], contradict_other=True)
+    f, p, label = run(alibi, witnesses("agree", "agree", "contradict"))
+    assert label != "contradicted" and f["support_t12"] == 1.0
+
+
+def test_trusted_sources_on_both_sides_is_disputed_not_contradicted():
+    alibi = AlibiResult(evidence=[ev("supports"), ev("contradicts", "https://e-history.kz/x", tier=2)],
+                        support_domains=["wikipedia.org"], contradict_domains=["e-history.kz"], contradict_tier12=True)
+    f, p, label = run(alibi)
+    assert label == "unconfirmed" and scoring.disputed(f)
+
+
+def test_trusted_contradiction_against_weak_support_still_wins():
+    alibi = AlibiResult(evidence=[ev("supports", "https://someblog.kz/x", tier=4), ev("contradicts")],
+                        support_domains=["someblog.kz"], contradict_domains=["wikipedia.org"], contradict_tier12=True)
+    f, p, label = run(alibi, witnesses("contradict", "contradict", "contradict"))
+    assert label == "contradicted"
+
+
+def test_lone_source_against_unanimous_witnesses_is_disputed():
+    alibi = AlibiResult(evidence=[ev("contradicts")], contradict_tier12=True, contradict_domains=["wikipedia.org"])
+    f, p, label = run(alibi, witnesses("agree", "agree", "agree", "agree", "agree", "agree"))
+    assert label == "unconfirmed" and scoring.disputed(f)
+    # but two independent contradicting sources still win
+    alibi.contradict_domains = ["wikipedia.org", "e-history.kz"]
+    f, p, label = run(alibi, witnesses("agree", "agree", "agree", "agree", "agree", "agree"))
+    assert label == "contradicted"

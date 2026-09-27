@@ -85,6 +85,9 @@ def support_score(alibi: AlibiResult) -> float:
 def features(claim: Claim, alibi: AlibiResult, rei: ReinterrogationResult, ph: PhantomResult,
              fame: FameResult, cits: list[CitationResult]) -> dict[str, float]:
     f = {
+        # auxiliary (not a model input): trusted tier-1/2 support exists
+        "support_t12": 1.0 if any(e.locked and e.stance == "supports" and e.tier <= 2 for e in alibi.evidence) else 0.0,
+        "contra_sources": float(len(alibi.contradict_domains)),   # auxiliary: independent contradicting sources
         "contradicted_t12": 1.0 if alibi.contradict_tier12 else 0.0,
         "contradicted_other": 1.0 if (alibi.contradict_other and not alibi.contradict_tier12) else 0.0,
         "support": support_score(alibi),
@@ -110,14 +113,33 @@ def probability(f: dict[str, float], w: dict[str, float] | None = None) -> float
 def label_for(p: float, f: dict[str, float]) -> str:
     """Labels are tied to evidence, not only to the number: ❌ always has a locked contradicting
     quote, ✅ always has locked support. High risk without proof is 🟠 'suspicious'."""
-    contradicted = f.get("contradicted_t12", 0) > 0 or f.get("contradicted_other", 0) > 0
-    if contradicted and p >= CONTRADICTED_MIN:
+    strong_contra = f.get("contradicted_t12", 0) > 0
+    weak_contra = f.get("contradicted_other", 0) > 0
+    trusted_support = f.get("support_t12", 0) > 0
+    any_support = f.get("support", 0) > 0
+    # A contradiction only wins if it is not outweighed by equally/more trusted support:
+    # tier-1/2 vs tier-1/2 = "sources disagree"; a weak site can't overrule trusted support.
+    # One lone contradicting source vs. witnesses who unanimously agree with the claim: don't call it false.
+    lone_vs_witnesses = f.get("contra_sources", 0) <= 1 and f.get("inconsistency", 1) <= 0.2 \
+        and f.get("witness_contradict", 0) == 0
+    if p >= CONTRADICTED_MIN and not lone_vs_witnesses and \
+            ((strong_contra and not trusted_support) or (weak_contra and not any_support)):
         return "contradicted"
-    if f.get("support", 0) > 0 and p < CONFIRMED_MAX:
+    if any_support and p < CONFIRMED_MAX and not strong_contra:
         return "confirmed"
+    if disputed(f):
+        return "unconfirmed"
     if p >= SUSPICIOUS_MIN or f.get("citation_failure", 0) >= 1.0:
         return "suspicious"
     return "unconfirmed"
+
+
+def disputed(f: dict[str, float]) -> bool:
+    """Trusted sources on both sides, or trusted support against a weaker contradiction."""
+    contra = f.get("contradicted_t12", 0) > 0 or f.get("contradicted_other", 0) > 0
+    lone_vs_witnesses = f.get("contra_sources", 0) <= 1 and f.get("inconsistency", 1) <= 0.2 \
+        and f.get("witness_contradict", 0) == 0
+    return contra and (f.get("support", 0) > 0 or lone_vs_witnesses)
 
 
 def contributions(f: dict[str, float], w: dict[str, float] | None = None) -> dict[str, float]:

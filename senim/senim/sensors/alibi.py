@@ -9,7 +9,8 @@ from .. import llm, net
 from ..config import settings
 from ..models import AlibiResult, Claim, Evidence
 from ..sources import TYPE_DOMAINS, domain_of, registrable_domain, tier_of
-from ..text import best_passages, quote_lock
+from ..text import best_passages, numbers, quote_lock
+from .reinterrogate import _CENTURY
 
 TAVILY_URL = "https://api.tavily.com/search"
 MAX_SOURCES = 5
@@ -17,11 +18,17 @@ MAX_SOURCES = 5
 JUDGE_SYSTEM = """You are the evidence judge of SENIM. You receive ONE claim and several numbered sources.
 For EACH source decide its stance toward the claim:
 - "supports": the source states the same fact.
-- "contradicts": the source states a DIFFERENT value for the same fact (another year, number, name, place...).
+- "contradicts": the source states a DIFFERENT value for the SAME fact (another year, number, name, place...),
+  so that the claim and the source cannot both be true. A different but compatible fact (about another part,
+  period or aspect, e.g. "the east is salty" vs a claim about the west) is "irrelevant", not "contradicts".
+  Mind granularity: a more precise value that falls inside the claim's range SUPPORTS it
+  (born "870" supports "9th century"; "10 August 1845" supports "1845"; "about 170" supports "around 170").
 - "irrelevant": the source does not address this specific fact.
 "quote": copy EXACTLY, character for character, one sentence or clause from that source (12-300 characters) that
 shows the stance. It is verified automatically against the page; invented or edited quotes are discarded.
 Use "" for irrelevant sources.
+For claims about numbers or dates the quote MUST contain the number/date itself (e.g. the year);
+a quote without it proves nothing and will be discarded.
 "source_says": when contradicting, what the source says instead, briefly, in the claim's language.
 "suggested_correction": if a source contradicts the claim, the claim rewritten to agree with that source
 (claim's language); otherwise null.
@@ -115,10 +122,20 @@ async def gather_pages(claim: Claim) -> tuple[str, list[str], list[dict]]:
     return backend, queries, pages[:MAX_SOURCES]
 
 
+def _shows_number(stance: str, wanted: set[str], got: set[str]) -> bool:
+    """For numeric claims a quote only counts if it shows the number: support must contain the
+    claimed value; a contradiction must contain some number and not simply repeat the claim."""
+    if stance == "supports":
+        return bool(wanted & got)
+    return bool(got) and not wanted <= got
+
+
 def apply_judgement(claim: Claim, pages: list[dict], judgement: dict) -> AlibiResult:
     """Quote-Lock the judge's assessments and compute the alibi features. Pure function (tested)."""
     res = AlibiResult()
     by_id = {f"S{i + 1}": p for i, p in enumerate(pages)}
+    wanted = set() if _CENTURY.search(claim.answer or "") else numbers(claim.answer or "")
+    best_tier: dict[str, int] = {}
     for a in judgement.get("assessments") or []:
         page = by_id.get(str(a.get("source", "")).strip())
         stance = a.get("stance")
@@ -135,7 +152,12 @@ def apply_judgement(claim: Claim, pages: list[dict], judgement: dict) -> AlibiRe
         if not locked:
             res.rejected_quotes += 1
             continue
+        if wanted and not _shows_number(stance, wanted, numbers(quote)):
+            ev.stance = "irrelevant"   # real quote, but it doesn't contain the number/date at stake
+            res.weak_quotes += 1
+            continue
         reg = registrable_domain(page["url"])
+        best_tier[reg] = min(best_tier.get(reg, 9), ev.tier)
         if stance == "supports" and reg not in res.support_domains:
             res.support_domains.append(reg)
         if stance == "contradicts":
@@ -145,6 +167,8 @@ def apply_judgement(claim: Claim, pages: list[dict], judgement: dict) -> AlibiRe
                 res.contradict_tier12 = True
             else:
                 res.contradict_other = True
+    res.support_domains.sort(key=lambda d: best_tier.get(d, 9))
+    res.contradict_domains.sort(key=lambda d: best_tier.get(d, 9))
     if res.contradict_domains and judgement.get("suggested_correction"):
         res.suggested_correction = str(judgement["suggested_correction"])[:400]
     return res

@@ -38,29 +38,40 @@ async def baseline(claim_text: str) -> str:
     return "FALSE" if "FALSE" in word else ("TRUE" if "TRUE" in word else "UNSURE")
 
 
+RANK = {"contradicted": 4, "suspicious": 3, "unconfirmed": 2, "confirmed": 1, "not_checkable": 0}
+
+
 async def run_row(row: dict, mode: str, sem: asyncio.Semaphore) -> dict:
+    """A row may be split into several claims ("moved to Akmola" + "in 2001"): like a human reader,
+    judge the row by its worst claim."""
     async with sem:
         _, claims, _ = await extract(row["claim"])
-        claim = claims[0] if claims else Claim(id="c1", text=row["claim"], lang=row.get("lang", "ru"))
-        claim.checkable = True
-        jobs = [alibi.run(claim), fame.run(claim)]
-        if mode == "deep":
-            jobs += [reinterrogate.run(claim), phantom.run_batch([claim], None)]
-        results = await asyncio.gather(*jobs, baseline(row["claim"]), return_exceptions=True)
-        a, f = results[0], results[1]
-        rei = results[2] if mode == "deep" else ReinterrogationResult(status="skipped")
-        ph = results[3].get(claim.id) if mode == "deep" and isinstance(results[3], dict) else PhantomResult(status="skipped")
-        base = results[-1]
-        for name, r in (("alibi", a), ("fame", f), ("rei", rei), ("phantom", ph), ("baseline", base)):
-            if isinstance(r, Exception):
-                raise RuntimeError(f"{row['id']}: {name} failed: {r}") from r
-        feats = scoring.features(claim, a, rei, ph or PhantomResult(status="skipped"), f, [])
-        p = scoring.probability(feats)
+        claims = [c for c in claims if c.checkable] or [Claim(id="c1", text=row["claim"], lang=row.get("lang", "ru"))]
+        base_task = asyncio.create_task(baseline(row["claim"]))
+        results = await asyncio.gather(*[_run_claim(c, mode) for c in claims])
+        worst = max(results, key=lambda r: (RANK[r["senim_label"]], r["p_wrong"]))
         return {
             "id": row["id"], "lang": row.get("lang"), "claim": row["claim"], "gold": row["label"],
-            "features": feats, "p_wrong": round(p, 4), "senim_label": scoring.label_for(p, feats),
-            "baseline": base, "alibi_backend": a.backend,
+            "features": worst["features"], "p_wrong": worst["p_wrong"], "senim_label": worst["senim_label"],
+            "baseline": await base_task, "alibi_backend": worst["alibi_backend"], "n_claims": len(claims),
         }
+
+
+async def _run_claim(claim: Claim, mode: str) -> dict:
+    jobs = [alibi.run(claim), fame.run(claim)]
+    if mode == "deep":
+        jobs += [reinterrogate.run(claim), phantom.run_batch([claim], None)]
+    results = await asyncio.gather(*jobs, return_exceptions=True)
+    a, f = results[0], results[1]
+    rei = results[2] if mode == "deep" else ReinterrogationResult(status="skipped")
+    ph = results[3].get(claim.id) if mode == "deep" and isinstance(results[3], dict) else PhantomResult(status="skipped")
+    for name, r in (("alibi", a), ("fame", f), ("rei", rei), ("phantom", ph)):
+        if isinstance(r, Exception):
+            raise RuntimeError(f"{claim.text[:40]}: {name} failed: {r}") from r
+    feats = scoring.features(claim, a, rei, ph or PhantomResult(status="skipped"), f, [])
+    p = scoring.probability(feats)
+    return {"features": feats, "p_wrong": round(p, 4), "senim_label": scoring.label_for(p, feats),
+            "alibi_backend": a.backend}
 
 
 def report(rows: list[dict], mode: str, elapsed: float, usage: llm.Usage) -> str:

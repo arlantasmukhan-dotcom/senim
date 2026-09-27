@@ -27,7 +27,7 @@ def test_run_row_offline(offline):
         return await run_bench.run_row(row, "deep", asyncio.Semaphore(1))
     res = asyncio.run(go())
     assert res["senim_label"] == "contradicted"
-    assert set(res["features"]) == set(scoring.FEATURES)
+    assert set(scoring.FEATURES) <= set(res["features"])
     text = run_bench.report([res], "deep", 1.0, run_bench.llm.Usage())
     assert "SENIM all sensors" in text and "t1" in text
 

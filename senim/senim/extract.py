@@ -7,7 +7,7 @@ import re
 from . import llm
 from .config import settings
 from .models import UNCHECKABLE_TYPES, Citation, Claim
-from .text import locate_span
+from .text import locate_span, numbers
 
 VALID_TYPES = {
     "number", "date", "quote", "citation", "law", "name_fact",
@@ -28,7 +28,9 @@ Rules for claims:
 - "entity_kind": person, place, organization, event, work, concept or other.
 - "question": a natural question whose answer is the key fact of the claim (same language as the answer).
 - "question_alt": the same question worded differently.
-- "answer": the key fact only, as short as possible (e.g. "1845", "Astana", "45 words").
+- "answer": the key fact AS STATED IN THE ANSWER, as short as possible (e.g. "1847", "Astana", "45 words").
+  Copy the answer's value even if you believe it is wrong. NEVER correct, update or "fix" facts anywhere:
+  you are extracting what the AI said, not what is true. Checking happens later.
 - "search_queries": 2 web search queries to verify the claim: one in the answer's language and one in Russian (or English if the answer is Russian).
 - "citation_ids": ids of citations from the answer that are attached to this claim.
 Prioritize specific facts (numbers, dates, names, laws, quotes). At most {max_claims} claims.
@@ -88,6 +90,21 @@ def _normalize_doi(doi: str | None) -> str | None:
     return doi if doi.startswith("10.") else None
 
 
+_NUM_IN_ORDER = re.compile(r"\d+(?:[.,]\d+)?")
+
+
+def faithful_answer(key_fact: str | None, claim_text: str) -> str | None:
+    """Guard against the extractor 'correcting' the claim: the key fact's numbers must come from the
+    claim itself. If the extractor wrote 1845 for a claim that says 1847, fall back to the claim's numbers."""
+    if not key_fact:
+        return key_fact
+    stated = numbers(claim_text)
+    given = numbers(key_fact)
+    if given and not given <= stated:
+        return " ".join(dict.fromkeys(_NUM_IN_ORDER.findall(claim_text))) or None
+    return key_fact
+
+
 def build(answer: str, data: dict) -> tuple[str, list[Claim], list[Citation]]:
     """Turn the extractor's JSON into validated Claim/Citation objects. Pure function (tested)."""
     lang = (data.get("language") or "ru").lower()
@@ -141,7 +158,8 @@ def build(answer: str, data: dict) -> tuple[str, list[Claim], list[Citation]]:
             entity_kind=(c.get("entity_kind") or None),
             question=c.get("question") or None,
             question_alt=c.get("question_alt") or None,
-            answer=(str(c["answer"]) if c.get("answer") not in (None, "") else None),
+            answer=faithful_answer(str(c["answer"]) if c.get("answer") not in (None, "") else None,
+                                   f"{c['text']} {answer[loc[0]:loc[1]] if loc else ''}"),
             search_queries=[q for q in (c.get("search_queries") or []) if isinstance(q, str) and q.strip()][:3]
             or [c["text"].strip()],
             citation_ids=[x for x in (c.get("citation_ids") or []) if x in cit_ids],

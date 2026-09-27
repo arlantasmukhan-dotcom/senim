@@ -20,6 +20,11 @@ T: dict[str, dict[str, str]] = {
         "kk": "{domain} басқаша айтады: «{quote}»",
         "en": "{domain} says otherwise: “{quote}”",
     },
+    "alibi_disagree": {
+        "ru": "⚖️ Источники расходятся: одни подтверждают, другие опровергают. Сравните цитаты и проверьте сами.",
+        "kk": "⚖️ Дереккөздер келіспейді: біреулері растайды, біреулері жоққа шығарады. Дәйексөздерді салыстырып, өзіңіз тексеріңіз.",
+        "en": "⚖️ Sources disagree: some confirm, some contradict. Compare the quotes and check for yourself.",
+    },
     "alibi_none": {
         "ru": "В найденных источниках нет надёжного подтверждения.",
         "kk": "Табылған дереккөздерде сенімді растау жоқ.",
@@ -40,8 +45,13 @@ T: dict[str, dict[str, str]] = {
         "kk": "Дәлел іздеу жұмыс істемеді ({note}).",
         "en": "Evidence search did not run ({note}).",
     },
+    "alibi_weak": {
+        "ru": "Не засчитано цитат: {n} — в них нет самого числа или даты.",
+        "kk": "Есепке алынбаған дәйексөздер: {n} — оларда санның не күннің өзі жоқ.",
+        "en": "{n} quote(s) not counted: they don't contain the number or date itself.",
+    },
     "rei_summary": {
-        "ru": "Переспросили {n} раз у {m} моделей: согласны — {agree}, другой ответ — {contra}, не знают — {unsure}.",
+        "ru": "Переспросили {n} {times} у {m} {models}: согласны — {agree}, другой ответ — {contra}, не знают — {unsure}.",
         "kk": "{m} модельден {n} рет қайта сұрадық: келіседі — {agree}, басқа жауап — {contra}, білмейді — {unsure}.",
         "en": "Re-asked {n} times across {m} models: {agree} agree, {contra} gave a different answer, {unsure} don't know.",
     },
@@ -164,6 +174,14 @@ FIELD_NAMES = {
 }
 
 
+def ru_plural(n: int, one: str, few: str, many: str) -> str:
+    if n % 10 == 1 and n % 100 != 11:
+        return one
+    if 2 <= n % 10 <= 4 and not 12 <= n % 100 <= 14:
+        return few
+    return many
+
+
 def t(key: str, lang: str, **kw) -> str:
     table = T[key]
     return table.get(lang, table["en"]).format(**kw)
@@ -215,14 +233,21 @@ def reasons(claim: Claim, alibi: AlibiResult, rei: ReinterrogationResult, ph: Ph
             out.append(t("alibi_contradict", lang, domain=e.domain, quote=_short(e.quote)))
         if alibi.support_domains:
             out.append(t("alibi_support", lang, n=len(alibi.support_domains), domains=", ".join(alibi.support_domains[:4])))
+        witnesses_agree = rei.status == "ok" and rei.answers and rei.agree_share >= 0.8 and rei.contradict_share == 0
+        if contra and (alibi.support_domains or (len(alibi.contradict_domains) <= 1 and witnesses_agree)):
+            out.append(t("alibi_disagree", lang))
         elif not contra:
             out.append(t("alibi_nosources" if alibi.note == "no sources found" else "alibi_none", lang))
         if alibi.rejected_quotes:
             out.append(t("alibi_rejected", lang, n=alibi.rejected_quotes))
+        if alibi.weak_quotes:
+            out.append(t("alibi_weak", lang, n=alibi.weak_quotes))
     # 2. Re-interrogation
     if rei.status == "ok" and rei.answers:
         n = len(rei.answers)
-        out.append(t("rei_summary", lang, n=n, m=len({a.model for a in rei.answers}),
+        m = len({a.model for a in rei.answers})
+        out.append(t("rei_summary", lang, n=n, m=m, times=ru_plural(n, "раз", "раза", "раз"),
+                     models="модели" if m == 1 else "моделей",
                      agree=sum(a.relation == "agree" for a in rei.answers),
                      contra=sum(a.relation == "contradict" for a in rei.answers),
                      unsure=sum(a.relation == "unsure" for a in rei.answers)))

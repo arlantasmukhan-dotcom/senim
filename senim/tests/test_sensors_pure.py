@@ -55,6 +55,10 @@ def test_numeric_relation_and_refusals():
     assert numeric_relation("1845", "Не знаю точно.") == "unsure"
     assert numeric_relation("Astana", "Astana") is None
     assert numeric_relation("1845", "в середине века") is None
+    # same year, different day: must NOT count as agreement
+    assert numeric_relation("1991 жылы 25 желтоқсан", "1991 жылы 16 желтоқсанда") == "contradict"
+    assert numeric_relation("1991 жылы 25 желтоқсан", "25 желтоқсан 1991") == "agree"
+    assert numeric_relation("1991 жылы 25 желтоқсан", "1991 жылы") is None
     for text in ["unknown", "I don't know", "Мәлімет жоқ", "Нет информации об этом человеке", "Такого поэта не существует"]:
         assert is_refusal(text), text
     assert not is_refusal("Он родился в 1932 году в Семее.")
@@ -135,3 +139,59 @@ def test_rate_limited_pageviews_do_not_fake_a_rare_topic(monkeypatch):
     monkeypatch.setattr(net, "get_json", partial)
     res = asyncio.run(fame.run(Claim(id="c", text="x", entity="Abai Kunanbayev")))
     assert res.status == "error"
+
+
+def test_numeric_claims_need_the_number_in_the_quote():
+    pages = [{"url": "https://e-history.kz/abai", "title": "Абай",
+              "text": "Родился в Чингисских горах в семье старшины. Абай родился 10 августа 1845 года."}]
+    judgement = {"assessments": [
+        {"source": "S1", "stance": "contradicts", "quote": "Родился в Чингисских горах в семье старшины"},  # no year
+    ]}
+    res = apply_judgement(CLAIM, pages, judgement)
+    assert res.weak_quotes == 1 and not res.contradict_domains and not res.contradict_tier12
+    judgement = {"assessments": [{"source": "S1", "stance": "contradicts", "quote": "Абай родился 10 августа 1845 года"}]}
+    res = apply_judgement(CLAIM, pages, judgement)
+    assert res.contradict_domains == ["e-history.kz"] and res.contradict_tier12  # e-history.kz is tier 2
+
+
+def test_support_domains_sorted_by_trust():
+    pages = [
+        {"url": "https://youtube.com/watch?v=1", "title": "v", "text": "Абай появился на свет в 1847 году точно"},
+        {"url": "https://ru.wikipedia.org/wiki/A", "title": "w", "text": "Абай появился на свет в 1847 году точно"},
+    ]
+    judgement = {"assessments": [
+        {"source": "S1", "stance": "supports", "quote": "Абай появился на свет в 1847 году"},
+        {"source": "S2", "stance": "supports", "quote": "Абай появился на свет в 1847 году"},
+    ]}
+    assert apply_judgement(CLAIM, pages, judgement).support_domains == ["wikipedia.org", "youtube.com"]
+
+
+def test_russian_plurals():
+    from senim.explain import ru_plural
+    assert [ru_plural(n, "раз", "раза", "раз") for n in (1, 2, 4, 5, 6, 11, 21, 22)] == \
+        ["раз", "раза", "раза", "раз", "раз", "раз", "раз", "раза"]
+
+
+def test_phantom_falls_back_to_web_search(monkeypatch):
+    import asyncio
+    from senim import net
+    from senim.config import settings
+    from senim.sensors import alibi, phantom
+
+    async def blocked(url, params=None, **kw):
+        return 403, None
+    async def search(query, include_domains=None):
+        return [{"url": "https://x.kz", "title": "Результаты", "text": "Ничего похожего тут нет"}]
+    monkeypatch.setattr(net, "get_json", blocked)
+    monkeypatch.setattr(alibi, "tavily_search", search)
+    monkeypatch.setattr(settings, "tavily_api_key", "test")
+    assert asyncio.run(phantom.exists_on_wikipedia("Ерлан Жаксыгалиев")) is None
+    assert asyncio.run(phantom.exists_on_web("Ерлан Жаксыгалиев")) is False
+    monkeypatch.setattr(settings, "tavily_api_key", "")
+    assert asyncio.run(phantom.exists_on_web("Ерлан Жаксыгалиев")) is None
+
+
+def test_centuries_are_not_compared_as_numbers():
+    assert numeric_relation("9th century", "He was born around 870.") is None
+    assert numeric_relation("IX век", "около 870 года") is None
+    assert numeric_relation("XIX ғасыр", "1845 жылы") is None
