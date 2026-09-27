@@ -39,10 +39,16 @@ async def index():
     return FileResponse(STATIC / "index.html")
 
 
+def _mask(key: str) -> str | None:
+    """A safe-to-log preview so a misconfigured key is visible without exposing it (e.g. in /api/health)."""
+    return f"{key[:10]}…{key[-4:]}" if len(key) > 16 else None
+
+
 @app.get("/api/health")
 async def health():
     return {
         "llm": settings.has_llm,
+        "llm_key_preview": _mask(settings.openrouter_api_key),
         "search": "tavily" if settings.has_search else "wikipedia (fallback)",
         "models": {"main": settings.model_main, "fast": settings.model_fast, "witnesses": settings.witnesses},
         "author_models": AUTHOR_MODELS,
