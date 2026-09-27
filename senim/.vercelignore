@@ -1,0 +1,16 @@
+# Backend deployment only: never upload secrets, local environments or the separate web app.
+.env
+.env.*
+.venv/
+.tools/
+web/
+tests/
+bench/
+docs/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+start.sh
+share.sh
+diagnose_key.py
+requirements-dev.txt

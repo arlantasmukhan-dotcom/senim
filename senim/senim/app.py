@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import hmac
 import json
+import os
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -39,12 +41,20 @@ async def index():
     return FileResponse(STATIC / "index.html")
 
 
+def require_proxy_token(x_senim_token: str | None = Header(default=None)) -> None:
+    """When SENIM_PROXY_TOKEN is set (public deployments), only the web app's server may call the API.
+    Locally the variable is unset and the API stays open, as before."""
+    expected = os.environ.get("SENIM_PROXY_TOKEN", "")
+    if expected and not hmac.compare_digest(x_senim_token or "", expected):
+        raise HTTPException(status_code=403, detail="forbidden")
+
+
 def _mask(key: str) -> str | None:
     """A safe-to-log preview so a misconfigured key is visible without exposing it (e.g. in /api/health)."""
     return f"{key[:10]}…{key[-4:]}" if len(key) > 16 else None
 
 
-@app.get("/api/health")
+@app.get("/api/health", dependencies=[Depends(require_proxy_token)])
 async def health():
     return {
         "llm": settings.has_llm,
@@ -61,7 +71,7 @@ def _sse(ev: dict) -> str:
     return f"event: {ev['event']}\ndata: {json.dumps(ev['data'], ensure_ascii=False)}\n\n"
 
 
-@app.post("/api/check")
+@app.post("/api/check", dependencies=[Depends(require_proxy_token)])
 async def check(req: CheckRequest):
     async def stream():
         async for ev in pipeline.check(req):
