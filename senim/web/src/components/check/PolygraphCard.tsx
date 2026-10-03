@@ -117,18 +117,18 @@ export function PolygraphCard({ state, claim, onNav, compact = false }: Props) {
 
           {v?.suggested_correction &&
             (compact ? (
-              <div className="flex flex-col gap-1 rounded-well bg-fix px-4 py-3.5">
+              <div className="flex flex-col gap-1 border-l-2 border-brand py-0.5 pl-4">
                 <span className="text-[12.5px] text-brand-soft-ink">{t.card.correction}</span>
                 <span className="text-base font-semibold leading-[1.4]">{v.suggested_correction}</span>
               </div>
             ) : (
-              <div className="flex items-center gap-4 rounded-well bg-fix px-[18px] py-4">
+              <div className="flex items-center gap-4 border-l-2 border-brand py-1 pl-[18px]">
                 <div className="flex flex-1 flex-col gap-1">
                   <span className="text-[13px] text-brand-soft-ink">{t.card.correction}</span>
                   <span className="text-[17px] font-semibold leading-[1.4]">{v.suggested_correction}</span>
                   <span className="text-[12.5px] text-brand-soft-ink/85">{t.card.correctionNote}</span>
                 </div>
-                <CopyButton text={v.suggested_correction} label={t.card.copy} className="border-fix-line" />
+                <CopyButton text={v.suggested_correction} label={t.card.copy} />
               </div>
             ))}
 
@@ -221,7 +221,7 @@ function AlibiDetails({ a, t }: { a: AlibiResult; t: Dict }) {
           href={e.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="group flex items-start gap-2.5 rounded-well bg-well px-3.5 py-3 transition-colors duration-150 hover:bg-line-soft"
+          className="group flex items-start gap-2.5 border-l-2 border-line-strong py-1 pl-3.5 transition-colors duration-150 hover:border-brand"
         >
           <LockSimpleIcon aria-hidden size={16} className="mt-0.5 shrink-0 text-brand" />
           <span className="flex min-w-0 flex-col gap-1">

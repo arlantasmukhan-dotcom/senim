@@ -20,6 +20,14 @@ export const metadata: Metadata = {
   title: "SENIM, полиграф для ответов ИИ",
   description:
     "Вставьте ответ ChatGPT или Gemini. Пять независимых датчиков проверят каждое утверждение и покажут доказательства.",
+  openGraph: {
+    title: "SENIM, полиграф для ответов ИИ",
+    description: "Пять независимых датчиков проверяют каждое утверждение ИИ и показывают доказательства.",
+    type: "website",
+    locale: "ru_RU",
+    alternateLocale: ["kk_KZ", "en_US"],
+  },
+  twitter: { card: "summary" },
 };
 
 export const viewport: Viewport = {

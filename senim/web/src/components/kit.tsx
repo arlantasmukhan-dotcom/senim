@@ -23,6 +23,11 @@ export const wrapApp = "mx-auto w-full max-w-[1328px] px-4 sm:px-6";
 /** Mockup card: 16px radius, hairline border, surface fill. */
 export const card = "rounded-card border border-line bg-surface";
 
+/** Landing rhythm: section spacing and the shared h2 / lead scales. */
+export const section = "pt-24 lg:pt-36";
+export const h2 = "text-[30px] font-semibold leading-[1.12] tracking-[-0.02em] sm:text-[40px]";
+export const lead = "max-w-[38em] text-[17px] leading-[1.6] text-ink-3";
+
 export const SENSOR_ICON: Record<string, Icon> = {
   alibi: BooksIcon,
   reinterrogation: UsersThreeIcon,

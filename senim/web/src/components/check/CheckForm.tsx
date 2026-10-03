@@ -37,6 +37,7 @@ export function CheckForm({ form, health, serverError, onRun }: Props) {
   const max = health && health !== "down" ? health.max_input_chars : 8000;
   const models = health && health !== "down" ? health.author_models : [];
   const textError = form.formState.errors.text;
+  const length = form.watch("text").length;
 
   return (
     <form
@@ -56,103 +57,121 @@ export function CheckForm({ form, health, serverError, onRun }: Props) {
           <FieldLabel htmlFor="answer" className="text-sm font-semibold">
             {t.check.answerLabel}
           </FieldLabel>
-          <Textarea
-            id="answer"
-            rows={12}
-            maxLength={max}
-            aria-invalid={!!textError}
-            autoComplete="off"
-            placeholder={t.hero.placeholder}
-            className={cn(control, "min-h-[240px] resize-y px-4 py-3.5 leading-[1.6] [field-sizing:fixed]")}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) form.handleSubmit(onRun)();
-            }}
-            {...form.register("text", {
-              validate: (v) => v.trim().length >= 20 || t.errors.too_short,
-            })}
-          />
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <FieldDescription className="text-[13px] text-ink-4">{fmt(t.check.answerHelp, { n: max })}</FieldDescription>
-            <Button
-              type="button"
-              variant="link"
-              size="text"
-              className="text-sm"
-              onClick={() => form.setValue("text", EXAMPLES[lang], { shouldValidate: form.formState.isSubmitted })}
-            >
-              {t.check.example}
-            </Button>
+          <div
+            className={cn(
+              "flex flex-col rounded-well border bg-surface transition-[border-color,box-shadow] duration-150 focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/25",
+              textError ? "border-bad" : "border-input",
+            )}
+          >
+            <Textarea
+              id="answer"
+              rows={12}
+              maxLength={max}
+              aria-invalid={!!textError}
+              aria-describedby="answer-help"
+              autoComplete="off"
+              placeholder={t.hero.placeholder}
+              className={cn(
+                control,
+                "min-h-[260px] resize-y rounded-b-none border-0 bg-transparent px-4 py-3.5 leading-[1.6] [field-sizing:fixed] focus-visible:border-0 focus-visible:ring-0 aria-invalid:ring-0",
+              )}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) form.handleSubmit(onRun)();
+              }}
+              {...form.register("text", {
+                validate: (v) => v.trim().length >= 20 || t.errors.too_short,
+              })}
+            />
+            <div className="flex items-center justify-between gap-3 border-t border-line-soft px-4 py-2">
+              <Button
+                type="button"
+                variant="link"
+                size="text"
+                className="text-sm"
+                onClick={() => form.setValue("text", EXAMPLES[lang], { shouldValidate: form.formState.isSubmitted })}
+              >
+                {t.check.example}
+              </Button>
+              <span className={cn("font-mono text-[13px]", length > max * 0.9 ? "text-sus" : "text-faint")} aria-hidden>
+                {length} / {max}
+              </span>
+            </div>
           </div>
+          <FieldDescription id="answer-help" className="text-[13px] text-ink-4">
+            {fmt(t.check.answerHelp, { n: max })}
+          </FieldDescription>
           <FieldError errors={textError ? [{ message: textError.message }] : undefined} />
         </Field>
 
-        <div className="flex flex-col gap-6">
-          <Field>
-            <FieldLabel htmlFor="question" className="text-sm font-semibold">
-              {t.check.questionLabel}
-            </FieldLabel>
-            <Input id="question" autoComplete="off" className={cn(control, "h-12 px-4")} {...form.register("question")} />
-            <FieldDescription className="text-[13px] text-ink-4">{t.check.questionHelp}</FieldDescription>
-          </Field>
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-6">
+            <Field>
+              <FieldLabel htmlFor="question" className="text-sm font-semibold">
+                {t.check.questionLabel}
+              </FieldLabel>
+              <Input id="question" autoComplete="off" className={cn(control, "h-12 px-4")} {...form.register("question")} />
+              <FieldDescription className="text-[13px] text-ink-4">{t.check.questionHelp}</FieldDescription>
+            </Field>
 
-          <Field>
-            <FieldLabel htmlFor="author" className="text-sm font-semibold">
-              {t.check.authorLabel}
-            </FieldLabel>
-            <Controller
-              control={form.control}
-              name="author"
-              render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger id="author" className={cn(control, "h-12 w-full px-4 data-[size=default]:h-12")}>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-well bg-surface">
-                    {models.map((mdl) => (
-                      <SelectItem key={mdl.id} value={mdl.id} className="h-10 text-[15px]">
-                        {mdl.label}
+            <Field>
+              <FieldLabel htmlFor="author" className="text-sm font-semibold">
+                {t.check.authorLabel}
+              </FieldLabel>
+              <Controller
+                control={form.control}
+                name="author"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="author" className={cn(control, "h-12 w-full px-4 data-[size=default]:h-12")}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-well bg-surface">
+                      {models.map((mdl) => (
+                        <SelectItem key={mdl.id} value={mdl.id} className="h-10 text-[15px]">
+                          {mdl.label}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value={UNKNOWN_AUTHOR} className="h-10 text-[15px]">
+                        {t.check.unknownAuthor}
                       </SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              <FieldDescription className="text-[13px] text-ink-4">{t.check.authorHelp}</FieldDescription>
+            </Field>
+
+            <FieldSet>
+              <FieldLegend className="mb-2 text-sm font-semibold" variant="label">{t.check.modeLabel}</FieldLegend>
+              <Controller
+                control={form.control}
+                name="mode"
+                render={({ field }) => (
+                  <RadioGroup value={field.value} onValueChange={field.onChange} className="gap-2">
+                    {(["deep", "quick"] as Mode[]).map((mode) => (
+                      <label
+                        key={mode}
+                        htmlFor={`mode-${mode}`}
+                        className={cn(
+                          "flex cursor-pointer items-start gap-3 rounded-well border px-4 py-3 transition-colors duration-150",
+                          field.value === mode ? "border-ink bg-surface" : "border-line hover:border-line-strong",
+                        )}
+                      >
+                        <RadioGroupItem id={`mode-${mode}`} value={mode} className="mt-1 size-4" />
+                        <span className="flex flex-col gap-0.5">
+                          <span className="text-[15px] font-semibold">{mode === "deep" ? t.check.deep : t.check.quick}</span>
+                          <span className="text-[13px] leading-[1.45] text-ink-4">{mode === "deep" ? t.check.deepHint : t.check.quickHint}</span>
+                        </span>
+                      </label>
                     ))}
-                    <SelectItem value={UNKNOWN_AUTHOR} className="h-10 text-[15px]">
-                      {t.check.unknownAuthor}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            <FieldDescription className="text-[13px] text-ink-4">{t.check.authorHelp}</FieldDescription>
-          </Field>
+                  </RadioGroup>
+                )}
+              />
+            </FieldSet>
+          </div>
 
-          <FieldSet>
-            <FieldLegend className="mb-2 text-sm font-semibold">{t.check.modeLabel}</FieldLegend>
-            <Controller
-              control={form.control}
-              name="mode"
-              render={({ field }) => (
-                <RadioGroup value={field.value} onValueChange={field.onChange} className="gap-2">
-                  {(["deep", "quick"] as Mode[]).map((mode) => (
-                    <label
-                      key={mode}
-                      htmlFor={`mode-${mode}`}
-                      className={cn(
-                        "flex cursor-pointer items-start gap-3 rounded-well border px-4 py-3 transition-colors duration-150",
-                        field.value === mode ? "border-ink bg-surface" : "border-line hover:border-line-strong",
-                      )}
-                    >
-                      <RadioGroupItem id={`mode-${mode}`} value={mode} className="mt-1 size-4" />
-                      <span className="flex flex-col gap-0.5">
-                        <span className="text-[15px] font-semibold">{mode === "deep" ? t.check.deep : t.check.quick}</span>
-                        <span className="text-[13px] leading-[1.45] text-ink-4">{mode === "deep" ? t.check.deepHint : t.check.quickHint}</span>
-                      </span>
-                    </label>
-                  ))}
-                </RadioGroup>
-              )}
-            />
-          </FieldSet>
-
-          <Button type="submit" size="lg">
-            {t.check.run} <ArrowRightIcon aria-hidden size={18} />
+          <Button type="submit" size="lg" className="group">
+            {t.check.run} <ArrowRightIcon aria-hidden size={18} className="transition-transform duration-200 group-hover:translate-x-1" />
           </Button>
         </div>
       </div>

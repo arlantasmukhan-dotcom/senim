@@ -26,7 +26,7 @@ function SkipLink() {
   return (
     <a
       href="#main"
-      className="sr-only rounded-full bg-primary px-5 py-3 font-semibold text-primary-foreground focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50"
+      className="sr-only rounded-full bg-primary px-5 py-3 font-semibold text-primary-foreground focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-(--z-overlay)"
     >
       {t.skip}
     </a>

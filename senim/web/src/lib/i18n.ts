@@ -114,6 +114,8 @@ const ru = {
         "Озеро Балхаш полностью пресное.",
       ],
       wrong: 2,
+      hint: "Нажмите на фразу, которая кажется вам ложной.",
+      reset: "Начать заново",
     },
     students: {
       title: "Школьникам и студентам",
@@ -122,6 +124,7 @@ const ru = {
     parents: { title: "Родителям", text: "Советы ИИ о здоровье, законах и деньгах получают ссылку на egov и adilet." },
     press: { title: "Журналистам и юристам", text: "Выдуманные статьи, законы и цитаты ловятся до публикации." },
   },
+  notFound: { h1: "Такой страницы нет", text: "Возможно, ссылка устарела. Проверка ответа и описание датчиков на месте.", back: "На главную" },
   final: { a: "Не верьте ИИ на слово. И нам тоже.", b: "Проверяйте доказательства." },
   footer: {
     tagline: "сенім значит доверие",
@@ -430,6 +433,8 @@ const kk: Dict = {
         "Балқаш көлі толығымен тұщы.",
       ],
       wrong: 2,
+      hint: "Жалған деп ойлаған сөйлемді басыңыз.",
+      reset: "Қайта бастау",
     },
     students: {
       title: "Оқушылар мен студенттерге",
@@ -438,6 +443,7 @@ const kk: Dict = {
     parents: { title: "Ата-аналарға", text: "ЖИ-дің денсаулық, заң және ақша туралы кеңестеріне egov пен adilet сілтемесі беріледі." },
     press: { title: "Журналистер мен заңгерлерге", text: "Ойдан шығарылған мақалалар, заңдар мен дәйексөздер жарияланбай тұрып анықталады." },
   },
+  notFound: { h1: "Мұндай бет жоқ", text: "Сілтеме ескірген болуы мүмкін. Жауапты тексеру мен датчиктер сипаттамасы орнында.", back: "Басты бетке" },
   final: { a: "ЖИ-ге сөзбен сенбеңіз. Бізге де.", b: "Дәлелді тексеріңіз." },
   footer: {
     tagline: "сенім",
@@ -743,6 +749,8 @@ const en: Dict = {
         "Lake Balkhash is entirely fresh water.",
       ],
       wrong: 2,
+      hint: "Tap the sentence you think is false.",
+      reset: "Start over",
     },
     students: {
       title: "For students",
@@ -751,6 +759,7 @@ const en: Dict = {
     parents: { title: "For parents", text: "AI advice on health, law and money comes back with a link to egov and adilet." },
     press: { title: "For journalists and lawyers", text: "Made-up papers, laws and quotes get caught before they are published." },
   },
+  notFound: { h1: "This page does not exist", text: "The link may be outdated. The answer check and the sensor guide are still here.", back: "Back to home" },
   final: { a: "Don't take AI at its word. Or ours.", b: "Check the evidence." },
   footer: {
     tagline: "сенім means trust",

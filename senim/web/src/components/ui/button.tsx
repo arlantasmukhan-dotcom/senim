@@ -5,16 +5,17 @@ import { Slot } from "radix-ui"
 
 // SENIM buttons follow the mockups: every button is a full pill, one accent (primary),
 // outline pills for secondary actions, round icon buttons for card navigation.
+// Hover: a slight lift in scale plus an accent glow; press settles below 1. Reduced motion keeps the glow only.
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2.5 rounded-full whitespace-nowrap font-semibold outline-none select-none transition-[background-color,border-color,color,transform] duration-150 ease-out active:scale-[0.98] focus-visible:ring-3 focus-visible:ring-ring/40 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+  "inline-flex shrink-0 items-center justify-center gap-2.5 rounded-full whitespace-nowrap font-semibold outline-none select-none transition-[background-color,border-color,color,scale,box-shadow] duration-200 ease-expo hover:scale-[1.03] active:scale-[0.98] motion-reduce:hover:scale-100 focus-visible:ring-3 focus-visible:ring-ring/40 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-brand-hover",
-        outline: "border border-line-strong bg-transparent font-medium text-ink hover:border-ink",
-        strong: "border border-ink bg-transparent text-ink hover:bg-ink hover:text-page",
-        link: "rounded-none px-0 text-brand hover:text-brand-hover active:scale-100",
-        icon: "border border-line-strong bg-transparent text-ink hover:border-ink disabled:opacity-40",
+        default: "bg-primary text-primary-foreground hover:bg-brand-hover hover:shadow-glow",
+        outline: "border border-line-strong bg-transparent font-medium text-ink hover:border-brand hover:text-brand hover:shadow-glow-soft",
+        strong: "border border-ink bg-transparent text-ink hover:bg-ink hover:text-page hover:shadow-glow",
+        link: "rounded-none px-0 text-brand hover:scale-100 hover:text-brand-hover active:scale-100",
+        icon: "border border-line-strong bg-transparent text-ink hover:border-brand hover:text-brand hover:shadow-glow-soft disabled:opacity-40",
         bare: "text-ink hover:bg-well disabled:opacity-40",
       },
       size: {

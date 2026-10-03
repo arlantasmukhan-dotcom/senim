@@ -9,6 +9,9 @@ import { LANG_LABEL, LANGS } from "@/lib/i18n";
 import { useLang } from "@/lib/lang";
 import { cn } from "@/lib/utils";
 
+/** Sticky, frosted header (blur only on this fixed layer, never on scrolling content). */
+const sticky = "sticky top-0 z-(--z-header) border-b border-line bg-page/85 backdrop-blur-md supports-[not(backdrop-filter:blur(1px))]:bg-page";
+
 interface NavItem {
   href: string;
   label: string;
@@ -111,9 +114,9 @@ export function LandingHeader() {
     { href: "/check", label: t.cta },
   ];
   return (
-    <header className="border-b border-line">
+    <header className={sticky}>
       <MobileBar items={items} />
-      <div className="mx-auto hidden h-[68px] w-full max-w-[1248px] items-center gap-10 px-6 md:flex">
+      <div className="mx-auto hidden h-(--c-header-h) w-full max-w-[1248px] items-center gap-10 px-6 md:flex">
         <Brand />
         <nav className="flex flex-1 gap-7 text-[15px]">
           {items.slice(0, 3).map((i) => (
@@ -140,18 +143,18 @@ export function AppHeader() {
     { href: "/#sensors", label: t.nav.how },
   ];
   return (
-    <header className="no-print border-b border-line">
+    <header className={cn(sticky, "no-print")}>
       <MobileBar items={items} />
-      <div className="mx-auto hidden h-16 w-full max-w-[1328px] items-center gap-10 px-6 md:flex">
+      <div className="mx-auto hidden h-(--c-header-h) w-full max-w-[1328px] items-center gap-10 px-6 md:flex">
         <Brand size="md" />
         <nav className="flex flex-1 gap-7 text-[15px]">
           {items.slice(0, 3).map((i) =>
             i.current ? (
-              <span key={i.href} aria-current="page" className="py-[21px] font-semibold text-ink shadow-[inset_0_-2px_0_var(--ink)]">
+              <span key={i.href} aria-current="page" className="py-[23px] font-semibold text-ink shadow-[inset_0_-2px_0_var(--ink)]">
                 {i.label}
               </span>
             ) : (
-              <Link key={i.href} href={i.href} className="py-[21px] text-ink-3 transition-colors duration-150 hover:text-ink">
+              <Link key={i.href} href={i.href} className="py-[23px] text-ink-3 transition-colors duration-150 hover:text-ink">
                 {i.label}
               </Link>
             ),

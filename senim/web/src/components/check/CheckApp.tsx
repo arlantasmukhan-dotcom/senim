@@ -263,7 +263,7 @@ function Results({ state, current, onOpen, onNav, onStop, onEdit, health, isDesk
         </div>
 
         {isDesktop && (
-          <aside className={cn(card, "sticky top-6 px-[30px] py-7 shadow-aside")}>
+          <aside className={cn(card, "sticky top-[calc(var(--c-header-h)+24px)] px-[30px] py-7 shadow-aside")}>
             {current ? <PolygraphCard state={state} claim={current} onNav={onNav} /> : <CardSkeleton />}
           </aside>
         )}
