@@ -82,6 +82,19 @@ def support_score(alibi: AlibiResult) -> float:
     return min(sum(best.values()), 3.0) / 3.0
 
 
+def decided_by_sources(alibi: AlibiResult) -> bool:
+    """Cascade rule: the sources already settle the claim, so asking other models (re-interrogation,
+    phantom twin) would cost money without changing the verdict. Settled means quote-locked evidence from
+    independent sources pointing one way only: at least two contradicting sources incl. a trusted one
+    (a lone contradiction still needs the witnesses), or support worth two trusted sources."""
+    if alibi.status != "ok":
+        return False
+    if alibi.contradict_domains:
+        return alibi.contradict_tier12 and len(alibi.contradict_domains) >= 2 and not alibi.support_domains
+    trusted = any(e.locked and e.stance == "supports" and e.tier <= 2 for e in alibi.evidence)
+    return trusted and support_score(alibi) >= 2 / 3
+
+
 def features(claim: Claim, alibi: AlibiResult, rei: ReinterrogationResult, ph: PhantomResult,
              fame: FameResult, cits: list[CitationResult]) -> dict[str, float]:
     f = {

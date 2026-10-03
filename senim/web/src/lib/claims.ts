@@ -106,6 +106,9 @@ export function reliability(tier: number): number {
   return Math.min(4, Math.max(1, 5 - tier));
 }
 
+/** The backend's note on a sensor the cascade skipped because the sources already settled the claim. */
+const NOT_NEEDED = "not_needed";
+
 function row<T>(key: SensorKey, tone: Tone, line = "", short = line, data?: T): SensorRow<T> {
   return { key, tone, line, short, data };
 }
@@ -132,6 +135,8 @@ function reiRow(r: ReinterrogationResult | undefined, s: CheckState, t: Dict, la
     if (s.request?.mode === "quick") return row("reinterrogation", "quick");
     return row("reinterrogation", s.running ? "pending" : "skipped");
   }
+  if (r.status === "skipped" && r.note === NOT_NEEDED)
+    return row("reinterrogation", "skipped", t.rei.notNeeded, t.rei.notNeeded, r);
   if (r.status !== "ok" || !r.answers.length)
     return row("reinterrogation", r.status === "error" ? "error" : "skipped", t.rei.none, t.rei.none, r);
   const n = r.answers.length;
@@ -146,6 +151,8 @@ function phantomRow(p: PhantomResult | undefined, s: CheckState, t: Dict): Senso
     if (s.request?.mode === "quick") return row("phantom", "quick", t.phantom.quick);
     return row("phantom", s.running ? "pending" : "skipped");
   }
+  if (p.status === "skipped" && p.note === NOT_NEEDED)
+    return row("phantom", "skipped", t.phantom.notNeeded, t.phantom.notNeeded, p);
   if (p.status !== "ok" || !p.answers.length)
     return row("phantom", p.status === "error" ? "error" : "skipped", t.phantom.off, t.phantom.off, p);
   const n = p.answers.length;

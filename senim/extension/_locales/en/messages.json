@@ -1,0 +1,23 @@
+{
+  "name": {
+    "message": "SENIM — fact-check AI answers"
+  },
+  "description": {
+    "message": "Select an answer from ChatGPT or any AI and check every fact: sources with a word-for-word quote and a verdict for each claim."
+  },
+  "action": {
+    "message": "Check the selection in SENIM"
+  },
+  "menu": {
+    "message": "Check in SENIM"
+  },
+  "optionsSite": {
+    "message": "SENIM site address"
+  },
+  "optionsHelp": {
+    "message": "Leave as is to use the shared site. For your own copy, enter its address (https or localhost)."
+  },
+  "optionsSave": {
+    "message": "Save"
+  }
+}

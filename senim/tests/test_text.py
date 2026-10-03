@@ -1,4 +1,4 @@
-from senim.text import best_passages, locate_span, normalize, numbers, parse_json_block, quote_lock
+from senim.text import best_passages, locate_span, normalize, parse_json_block, quantities, quote_lock, same_number
 
 
 def test_quote_lock_accepts_formatting_differences():
@@ -37,8 +37,26 @@ def test_parse_json_block_variants():
     assert parse_json_block("[1, 2]") == [1, 2]
 
 
-def test_numbers():
-    assert numbers("10 августа 1845 года, 3,5 км") == {"10", "1845", "3.5"}
+def _values(text):
+    return [n.value for n in quantities(text)]
+
+
+def test_numbers_by_value():
+    assert _values("10 августа 1845 года, 3,5 км") == [10, 1845, 3.5]
+    assert _values("20,000") == _values("20 000") == _values("20 000") == [20000]
+    assert _values("2,700,000 и 2.700.000") == [2_700_000, 2_700_000]
+    assert _values("2,7 млн") == _values("2.7 million") == [2_700_000]
+    assert _values("3 мың") == [3000] and _values("1,5 млрд") == [1.5e9]
+    assert _values("10.08.1845") == [10, 8, 1845]
+    assert _values("10 км") == [10]  # "к" of "км" is not the "k" (thousand) scale
+
+
+def test_rounded_numbers_match():
+    two_point_seven = quantities("2,7 млн")[0]
+    assert same_number(two_point_seven, quantities("2 700 000 человек")[0])
+    assert same_number(two_point_seven, quantities("2 683 000")[0])      # "2,7 млн" is a rounded figure
+    assert not same_number(two_point_seven, quantities("3 100 000")[0])
+    assert not same_number(quantities("1845")[0], quantities("1847")[0])
 
 
 def test_best_passages_keeps_relevant_part():

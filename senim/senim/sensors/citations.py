@@ -4,13 +4,14 @@ and does it actually say what the answer attributes to it?"""
 from __future__ import annotations
 
 import asyncio
+import difflib
 import re
 from urllib.parse import quote
 
 from .. import llm, net
 from ..config import settings
 from ..models import Citation, CitationResult, Claim
-from ..text import normalize, quote_lock, title_similarity
+from ..text import normalize, quote_lock, title_similarity, words
 
 TITLE_MATCH = 0.85
 FAILURE_WEIGHT = {"fabricated": 1.0, "frankenstein": 1.0, "never_existed": 1.0, "not_supporting": 0.6, "dead_link": 0.3}
@@ -37,27 +38,51 @@ def inverted_index_to_text(inv: dict | None) -> str:
     return " ".join(slots[i] for i in sorted(slots))
 
 
+_TRANSLIT = str.maketrans({
+    "а": "a", "б": "b", "в": "v", "г": "g", "д": "d", "е": "e", "ё": "e", "ж": "zh", "з": "z", "и": "i",
+    "й": "i", "к": "k", "л": "l", "м": "m", "н": "n", "о": "o", "п": "p", "р": "r", "с": "s", "т": "t",
+    "у": "u", "ф": "f", "х": "kh", "ц": "ts", "ч": "ch", "ш": "sh", "щ": "shch", "ъ": "", "ы": "y", "ь": "",
+    "э": "e", "ю": "iu", "я": "ia", "ә": "a", "ғ": "g", "қ": "k", "ң": "n", "ө": "o", "ұ": "u", "ү": "u",
+    "һ": "h", "і": "i",
+})
+_NAME_MATCH = 0.8
+
+
 def name_tokens(names: list[str]) -> set[str]:
-    """All name words of 3+ letters ("Farquhar, S." / "Sebastian Farquhar" → {"farquhar", "sebastian"}).
+    """All name words of 3+ letters, in Latin letters ("Farquhar, S." → {"farquhar"}; "Сейткали" → {"seitkali"}).
     Initials are dropped. Comparing every word avoids guessing which one is the surname."""
     out = set()
     for n in names:
-        for tok in normalize(n).replace(",", " ").replace(".", " ").split():
+        for tok in normalize(n).translate(_TRANSLIT).replace(",", " ").replace(".", " ").split():
             if len(tok) >= 3:
                 out.add(tok)
     return out
 
 
+def _names_overlap(claimed: set[str], real: set[str]) -> bool:
+    """Spelling variants of one name count as a match: Seitkali / Seytkali / Сейткали."""
+    return any(a == b or difflib.SequenceMatcher(None, a, b).ratio() >= _NAME_MATCH for a in claimed for b in real)
+
+
+def titles_match(cited: str, real: str) -> bool:
+    """Similar enough, or one is the other without its subtitle ("Deep Learning" vs "Deep Learning: A Review")."""
+    if title_similarity(cited, real) >= TITLE_MATCH:
+        return True
+    a, b = " ".join(words(cited)), " ".join(words(real))
+    short, long_ = sorted((a, b), key=len)
+    return len(short.split()) >= 3 and long_.startswith(short)
+
+
 def compare_metadata(cit: Citation, title: str | None, year: int | None, authors: list[str]) -> list[str]:
     """Return what does not match between the cited reference and the real record. Pure (tested)."""
     mismatches = []
-    if cit.title and title and title_similarity(cit.title, title) < TITLE_MATCH:
+    if cit.title and title and not titles_match(cit.title, title):
         mismatches.append("title")
     if cit.year and year and abs(cit.year - year) > 1:
         mismatches.append("year")
     if cit.authors and authors:
         claimed, real = name_tokens(cit.authors), name_tokens(authors)
-        if claimed and real and not claimed & real:
+        if claimed and real and not _names_overlap(claimed, real):
             mismatches.append("authors")
     return mismatches
 
@@ -96,29 +121,40 @@ def _from_openalex(item: dict) -> dict:
     }
 
 
+async def _quiet(coro):
+    """A lookup that failed is just a missing answer: the other databases may still have the record."""
+    try:
+        return await coro
+    except Exception:
+        return 0, None
+
+
 async def metadata_by_doi(doi: str) -> tuple[str, dict] | None:
-    status, data = await net.get_json(f"https://api.crossref.org/works/{quote(doi, safe='/')}", _crossref_params())
-    if status == 200 and data and data.get("message"):
-        return "crossref", _from_crossref(data["message"])
-    status, data = await net.get_json(f"https://api.openalex.org/works/https://doi.org/{quote(doi, safe='/')}")
-    if status == 200 and data:
-        return "openalex", _from_openalex(data)
+    """Crossref and OpenAlex are asked at the same time; Crossref wins when both know the DOI."""
+    (cs, cdata), (os_, odata) = await asyncio.gather(
+        _quiet(net.get_json(f"https://api.crossref.org/works/{quote(doi, safe='/')}", _crossref_params())),
+        _quiet(net.get_json(f"https://api.openalex.org/works/https://doi.org/{quote(doi, safe='/')}")),
+    )
+    if cs == 200 and cdata and cdata.get("message"):
+        return "crossref", _from_crossref(cdata["message"])
+    if os_ == 200 and odata:
+        return "openalex", _from_openalex(odata)
     return None
 
 
 async def search_by_title(cit: Citation) -> tuple[str, dict] | None:
     query = " ".join(filter(None, [cit.title, " ".join(cit.authors[:2]), str(cit.year or "")]))
-    status, data = await net.get_json("https://api.crossref.org/works",
-                                      {"query.bibliographic": query, "rows": 3, **_crossref_params()})
-    for item in ((data or {}).get("message", {}).get("items", []) if status == 200 else []):
-        meta = _from_crossref(item)
-        if title_similarity(cit.title, meta["title"]) >= TITLE_MATCH:
-            return "crossref", meta
-    status, data = await net.get_json("https://api.openalex.org/works", {"search": cit.title, "per-page": 3})
-    for item in ((data or {}).get("results", []) if status == 200 else []):
-        meta = _from_openalex(item)
-        if title_similarity(cit.title, meta["title"]) >= TITLE_MATCH:
-            return "openalex", meta
+    (cs, cdata), (os_, odata) = await asyncio.gather(
+        _quiet(net.get_json("https://api.crossref.org/works",
+                            {"query.bibliographic": query, "rows": 3, **_crossref_params()})),
+        _quiet(net.get_json("https://api.openalex.org/works", {"search": cit.title, "per-page": 3})),
+    )
+    candidates = [("crossref", _from_crossref(i)) for i in ((cdata or {}).get("message", {}).get("items", [])
+                                                            if cs == 200 else [])]
+    candidates += [("openalex", _from_openalex(i)) for i in ((odata or {}).get("results", []) if os_ == 200 else [])]
+    for source, meta in candidates:
+        if meta["title"] and titles_match(cit.title, meta["title"]):
+            return source, meta
     return None
 
 
@@ -167,12 +203,11 @@ async def check_one(cit: Citation, claims_by_id: dict[str, Claim]) -> CitationRe
     try:
         found = None
         if cit.doi:
-            registered = await doi_registered(cit.doi)
+            registered, found = await asyncio.gather(doi_registered(cit.doi), metadata_by_doi(cit.doi))
             if registered is False:
                 res.exists, res.verdict, res.lookup = False, "fabricated", "doi.org"
                 res.note = "This DOI is not registered with the DOI system."
                 return res
-            found = await metadata_by_doi(cit.doi)
             res.exists = True if registered else None
             if not found:
                 res.lookup = "doi.org"

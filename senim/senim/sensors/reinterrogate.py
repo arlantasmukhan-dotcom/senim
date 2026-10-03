@@ -10,7 +10,7 @@ import re
 from .. import llm
 from ..config import settings
 from ..models import Claim, ReinterrogationResult, WitnessAnswer
-from ..text import numbers
+from ..text import has_number, quantities
 
 WITNESS_SYSTEM = (
     "Answer the question in ONE short sentence with the specific fact (number, date, name, place). "
@@ -43,19 +43,20 @@ def is_refusal(answer: str) -> bool:
 
 def numeric_relation(claim_answer: str, witness_answer: str) -> str | None:
     """Deterministic comparison when the key fact is a number/date. None = cannot decide numerically."""
-    wanted = numbers(claim_answer)
+    wanted = quantities(claim_answer)
     if not wanted or _CENTURY.search(claim_answer):
         return None               # "9th century" vs "born around 870": not comparable digit-by-digit
     if is_refusal(witness_answer):
         return "unsure"
-    got = numbers(witness_answer)
+    got = quantities(witness_answer)
     if not got:
         return None
-    if wanted <= got:
+    if all(has_number(w, got) for w in wanted):
         return "agree"            # every key number of the claim is there (extra ones like the day are fine)
-    if got - wanted:
-        return "contradict"       # e.g. claim "1991, 25 Dec" vs witness "1991, 16 Dec"
-    return None                   # partial answer (only "1991"): let the classifier decide
+    missing = {w.kind for w in wanted if not has_number(w, got)}
+    if any(g.kind in missing and not has_number(g, wanted) for g in got):
+        return "contradict"       # same kind, different value: "25 Dec 1991" vs "16 Dec 1991"
+    return None                   # partial or not comparable ("1845" vs "aged 59"): the classifier decides
 
 
 def summarize(answers: list[WitnessAnswer]) -> ReinterrogationResult:

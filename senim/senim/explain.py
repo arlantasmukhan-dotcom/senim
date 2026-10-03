@@ -55,6 +55,11 @@ T: dict[str, dict[str, str]] = {
         "kk": "{m} модельден {n} рет қайта сұрадық: келіседі — {agree}, басқа жауап — {contra}, білмейді — {unsure}.",
         "en": "Re-asked {n} times across {m} models: {agree} agree, {contra} gave a different answer, {unsure} don't know.",
     },
+    "cascade_skip": {
+        "ru": "Источники однозначны, поэтому другие модели не опрашивали: их ответ не изменил бы вердикт.",
+        "kk": "Дереккөздер біржақты, сондықтан басқа модельдерден сұрамадық: олардың жауабы қорытындыны өзгертпейді.",
+        "en": "The sources are unambiguous, so other models were not asked: their answers would not change the verdict.",
+    },
     "rei_values": {
         "ru": "Другие ответы: {values}.",
         "kk": "Басқа жауаптар: {values}.",
@@ -255,6 +260,8 @@ def reasons(claim: Claim, alibi: AlibiResult, rei: ReinterrogationResult, ph: Ph
                                      for a in rei.answers if a.relation == "contradict"))
         if others:
             out.append(t("rei_values", lang, values="; ".join(others[:3])))
+    elif rei.status == "skipped" and rei.note == "not_needed":
+        out.append(t("cascade_skip", lang))
     # 3. Phantom twin
     if ph.status == "ok" and ph.answers:
         k, n = sum(a.fabricated for a in ph.answers), len(ph.answers)

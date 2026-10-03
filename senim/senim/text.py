@@ -6,6 +6,7 @@ import difflib
 import json
 import re
 import unicodedata
+from dataclasses import dataclass
 
 _QUOTES = str.maketrans({
     "«": '"', "»": '"', "„": '"', "“": '"', "”": '"', "‟": '"', "″": '"',
@@ -91,14 +92,16 @@ def best_passages(page_text: str, query: str, max_chars: int = 2400, window: int
     q = set(words(query))
     if not q:
         return page_text[:max_chars]
+    q_nums = quantities(query)
     chunks = [page_text[i:i + window] for i in range(0, len(page_text), window // 2)]
     scored = []
     for i, chunk in enumerate(chunks):
         w = words(chunk)
         if not w:
             continue
-        hits = sum(1 for t in w if t in q)
-        digits = sum(1 for t in q if t.isdigit() and t in w)  # numbers matter most for facts
+        hits = sum(1 for t in w if t in q and not t.isdigit())
+        nums = quantities(chunk) if q_nums else []
+        digits = sum(1 for n in q_nums if has_number(n, nums))  # numbers matter most; "2 700 000" = "2,7 млн"
         scored.append((hits + 3 * digits, i))
     scored.sort(reverse=True)
     picked, total = [], 0
@@ -110,11 +113,82 @@ def best_passages(page_text: str, query: str, max_chars: int = 2400, window: int
     return "\n…\n".join(chunks[i] for i in sorted(picked))
 
 
-_NUM = re.compile(r"\d+(?:[.,]\d+)?")
+@dataclass(frozen=True)
+class Num:
+    """A number as a value plus the rounding step its writing implies ("2,7 млн" → 2 700 000 ± 50 000)."""
+    value: float
+    step: float
+    scaled: bool
+    raw: str
+
+    @property
+    def kind(self) -> str:
+        """Only numbers of the same kind are compared: a day never contradicts a year or a population."""
+        if self.scaled or self.value != int(self.value):
+            return "other"
+        if 1000 <= self.value <= 2100:
+            return "year"
+        return "day" if 1 <= self.value <= 31 else "other"
 
 
-def numbers(text: str) -> set[str]:
-    return {n.replace(",", ".") for n in _NUM.findall(text or "")}
+_NUM_SPACES = str.maketrans({" ": " ", " ": " ", " ": " ", " ": " "})
+_DATE = re.compile(r"(?<![\d.,])(\d{1,2})([./])(\d{1,2})\2(\d{4}|\d{2})(?![\d.,]*\d)")
+_NUMBER = re.compile(
+    r"(?<![\d.,])"
+    r"(?P<num>(?P<grouped>\d{1,3}(?P<sep>[ ,.'’])\d{3}(?:(?P=sep)\d{3})*)(?P<gfrac>[.,]\d+)?(?!\d)"  # 20 000 / 20,000
+    r"|(?P<whole>\d+)(?:[.,](?P<frac>\d+))?)"                                                      # 1845 / 2,7
+    r"(?:\s?(?P<scale>тыс|тысяч\w*|мың\w*|thousand\w*|k|млн|миллион\w*|million\w*|mln|mn|"
+    r"млрд|миллиард\w*|billion\w*|bn|трлн|триллион\w*|trillion\w*)(?![^\W\d_]))?",
+    re.I,
+)
+_SCALE = (("тыс", 1e3), ("мың", 1e3), ("thousand", 1e3), ("k", 1e3), ("млн", 1e6), ("миллион", 1e6),
+          ("million", 1e6), ("mln", 1e6), ("mn", 1e6), ("млрд", 1e9), ("миллиард", 1e9), ("billion", 1e9),
+          ("bn", 1e9), ("трлн", 1e12), ("триллион", 1e12), ("trillion", 1e12))
+
+
+def _scale_of(word: str | None) -> float:
+    if not word:
+        return 1.0
+    w = word.lower()
+    return next(v for prefix, v in _SCALE if w.startswith(prefix))
+
+
+def quantities(text: str) -> list[Num]:
+    """All numbers in `text` by value. Understands thousands separators ("20 000", "20,000"), decimal commas
+    ("2,7"), scale words ("2,7 млн", "3 мың", "1.5 billion") and dotted dates ("10.08.1845" → 10, 8, 1845)."""
+    text = (text or "").translate(_NUM_SPACES)
+    out: list[Num] = []
+
+    def date(m: re.Match) -> str:
+        year = int(m.group(4)) if len(m.group(4)) == 4 else None
+        for part in (m.group(1), m.group(3), m.group(4) if year else None):
+            if part:
+                out.append(Num(float(int(part)), 1.0, False, part))
+        return " " * len(m.group(0))
+
+    text = _DATE.sub(date, text)
+    for m in _NUMBER.finditer(text):
+        if m.group("grouped"):
+            whole = m.group("grouped").replace(m.group("sep"), "")
+            frac = (m.group("gfrac") or "")[1:]
+        else:
+            whole, frac = m.group("whole"), m.group("frac") or ""
+        scale = _scale_of(m.group("scale"))
+        value = float(f"{whole}.{frac}" if frac else whole) * scale
+        step = (10 ** -len(frac) if frac else 1.0) * scale
+        out.append(Num(value, step, scale != 1.0, m.group(0).strip()))
+    return out
+
+
+def same_number(a: Num, b: Num, strict: bool = False) -> bool:
+    """Equal up to the coarser rounding of the two: "2,7 млн" equals "2 700 000" and "2 683 000".
+    strict: up to the finer rounding, so "3 млн" is not "2,7 млн" (a rewrite, not a rounding)."""
+    steps = (a.step, b.step)
+    return abs(a.value - b.value) <= (min(steps) if strict else max(steps)) / 2 + 1e-9
+
+
+def has_number(n: Num, pool: list[Num], strict: bool = False) -> bool:
+    return any(same_number(n, p, strict) for p in pool)
 
 
 def parse_json_block(text: str):

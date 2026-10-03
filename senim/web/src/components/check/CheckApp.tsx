@@ -89,16 +89,27 @@ export function CheckApp() {
     startRef.current = start;
   });
   useEffect(() => {
+    // The browser extension and the Telegram bot link here as /check#text=…: the hash never reaches a server.
+    const fromHash = new URLSearchParams(window.location.hash.slice(1)).get("text");
     let raw: string | null = null;
-    try {
-      raw = sessionStorage.getItem(PENDING_KEY);
-    } catch {
-      return;
+    if (!fromHash) {
+      try {
+        raw = sessionStorage.getItem(PENDING_KEY);
+      } catch {
+        return;
+      }
+      if (!raw) return;
     }
     if (!raw) return;
     const id = setTimeout(() => {
-      sessionStorage.removeItem(PENDING_KEY);
-      const { text } = JSON.parse(raw!) as { text: string };
+      let text: string;
+      if (fromHash) {
+        history.replaceState(null, "", window.location.pathname);
+        text = fromHash;
+      } else {
+        sessionStorage.removeItem(PENDING_KEY);
+        text = (JSON.parse(raw!) as { text: string }).text;
+      }
       form.setValue("text", text);
       startRef.current({ ...form.getValues(), text });
     }, 0);

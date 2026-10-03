@@ -44,12 +44,16 @@ class WikimediaUnavailable(Exception):
 async def find_entity(name: str, lang: str) -> tuple[str, str, str] | None:
     """None = Wikidata answered and has no such entity. Raises if Wikidata could not be reached,
     because "could not check" must never look like "nobody wrote about this" (max tail risk)."""
-    answered = False
-    for l in dict.fromkeys([lang if lang in WIKIS else "en", "en", "ru"]):
-        status, data = await net.get_json("https://www.wikidata.org/w/api.php", {
-            "action": "wbsearchentities", "search": name, "language": l, "uselang": l,
-            "limit": 1, "format": "json",
-        })
+    langs = list(dict.fromkeys([lang if lang in WIKIS else "en", "en", "ru"]))
+    replies = await asyncio.gather(*[net.get_json("https://www.wikidata.org/w/api.php", {
+        "action": "wbsearchentities", "search": name, "language": l, "uselang": l,
+        "limit": 1, "format": "json",
+    }, cache_ttl=net.WEEK) for l in langs], return_exceptions=True)
+    answered, status = False, 0
+    for reply in replies:  # in language priority order
+        if isinstance(reply, Exception):
+            continue
+        status, data = reply
         if status != 200 or data is None:
             continue
         answered = True
@@ -66,7 +70,7 @@ async def sitelinks(qid: str) -> dict[str, str]:
     status, data = await net.get_json("https://www.wikidata.org/w/api.php", {
         "action": "wbgetentities", "ids": qid, "props": "sitelinks",
         "sitefilter": "|".join(f"{w}wiki" for w in WIKIS), "format": "json",
-    })
+    }, cache_ttl=net.WEEK)
     if status != 200 or data is None:
         raise WikimediaUnavailable(f"Wikidata sitelinks unavailable (HTTP {status})")
     links = (data.get("entities", {}).get(qid, {}) or {}).get("sitelinks", {})
@@ -78,7 +82,7 @@ async def pageviews(lang: str, title: str) -> int:
     article = quote(title.replace(" ", "_"), safe="")
     url = (f"https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/"
            f"{lang}.wikipedia/all-access/user/{article}/monthly/{start}/{end}")
-    status, data = await net.get_json(url)
+    status, data = await net.get_json(url, cache_ttl=net.WEEK)
     if status == 404:          # article has no pageview data: genuinely ~0 views
         return 0
     if status != 200 or data is None:

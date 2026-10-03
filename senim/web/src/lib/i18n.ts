@@ -255,6 +255,7 @@ const ru = {
     model: "модель",
     q: "вопрос {i}",
     rel: { agree: "согласен", contradict: "другой ответ", unsure: "не знает" },
+    notNeeded: "Не понадобилось: источники уже дали ответ.",
   },
   phantom: {
     bluff: "Модель, написавшая ответ, уверенно описала того, кого не существует. Её уверенности в таких вопросах верить нельзя.",
@@ -271,6 +272,7 @@ const ru = {
   },
   fame: {
     famous: "{views} просмотров Википедии за год. ИИ знает тему хорошо, а ошибку здесь легко проверить.",
+    notNeeded: "Не понадобился: источники уже дали ответ.",
     short: { famous: "Очень известная тема, ошибку легко проверить.", known: "Умеренно известная тема.", rare: "Редкая тема, ИИ здесь ошибается чаще.", unknown: "Статьи в Википедии нет." },
     known: "{views} просмотров Википедии за год. Тема умеренно известная.",
     rare: "Всего {views} просмотров Википедии за год. О редких темах ИИ ошибается чаще.",
@@ -301,6 +303,8 @@ const ru = {
   } as Record<string, string>,
   setup: {
     noKey: "Прототип работает без ключей: все экраны и кнопки доступны. Сама проверка включится, когда в файле senim/.env появится OPENROUTER_API_KEY.",
+    rate_limited: "Слишком много проверок с вашего адреса. Попробуйте через час.",
+    budget_exceeded: "Дневной лимит проверок на сервере исчерпан. Попробуйте завтра.",
     down: "Сервер проверки не запущен. Запустите его командой ./start.sh в папке senim.",
   },
   health: {
@@ -569,6 +573,7 @@ const kk: Dict = {
   },
   phantom: {
     bluff: "Жауапты жазған модель мүлде жоқ адамды сеніммен сипаттады. Мұндай сұрақтардағы сенімділігіне сенуге болмайды.",
+    notNeeded: "Қажет болмады: дереккөздер жауап берді.",
     bluffShort: "Модель жоқ адам туралы фактілерді ойдан шығарды.",
     partial: "Жоқ егіз туралы модель {n} әрекеттің {k}-інде фактілерді ойдан шығарды.",
     honest: "Модель жоқ егізді білмейтінін адал айтты. Жақсы белгі.",
@@ -585,6 +590,7 @@ const kk: Dict = {
     short: { famous: "Өте танымал тақырып, қатені тексеру оңай.", known: "Орташа танымал тақырып.", rare: "Сирек тақырып, ЖИ мұнда жиі қателеседі.", unknown: "Уикипедияда мақала жоқ." },
     known: "Уикипедияда жылына {views} қаралым. Тақырып орташа танымал.",
     rare: "Уикипедияда жылына бар болғаны {views} қаралым. Сирек тақырыптарда ЖИ жиірек қателеседі.",
+    notNeeded: "Қажет болмады: дереккөздер жауап берді.",
     unknown: "Уикипедияда мақала жоқ. ЖИ бұл туралы ештеңе дерлік оқи алмады.",
     off: "Тақырыптың қаншалықты танымал екенін анықтау мүмкін болмады.",
   },
@@ -615,6 +621,8 @@ const kk: Dict = {
     down: "Тексеру сервері іске қосылмаған. Оны senim қалтасында ./start.sh командасымен іске қосыңыз.",
   },
   health: {
+    rate_limited: "Сіздің мекенжайыңыздан тексеру тым көп. Бір сағаттан кейін қайталаңыз.",
+    budget_exceeded: "Сервердегі тексерудің күндік лимиті таусылды. Ертең қайталаңыз.",
     ok: "ЖИ мен іздеу қосулы",
     wiki: "ЖИ қосулы, іздеу Уикипедия бойынша",
     noKey: "OpenRouter кілті жоқ",
@@ -881,6 +889,7 @@ const en: Dict = {
     bluffShort: "The model invented facts about someone who doesn't exist.",
     partial: "About the non-existent twin, the model invented facts in {k} of {n} tries.",
     honest: "The model honestly said it doesn't know the non-existent twin. A good sign.",
+    notNeeded: "Not needed: the sources already settled it.",
     box: "Control question for {model}",
     wiki: "Not on kk, ru or en Wikipedia.",
     web: "A web search found nothing by this name.",
@@ -897,6 +906,7 @@ const en: Dict = {
     unknown: "No Wikipedia article. AI could have read almost nothing about it.",
     off: "Could not measure how well known the topic is.",
   },
+    notNeeded: "Not needed: the sources already settled it.",
   cit: {
     none: "This claim has no reference.",
     labels: {
@@ -927,6 +937,8 @@ const en: Dict = {
     ok: "AI and search connected",
     wiki: "AI connected, Wikipedia search only",
     noKey: "No OpenRouter key",
+    rate_limited: "Too many checks from your address. Try again in an hour.",
+    budget_exceeded: "The server's daily check limit is used up. Try again tomorrow.",
     down: "Check server not responding",
   },
   report: { title: "SENIM check report", pWrong: "chance it's wrong", correction: "Correction", tip: "Check it yourself" },

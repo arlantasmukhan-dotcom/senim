@@ -6,12 +6,14 @@ import asyncio
 import time
 from typing import Any, AsyncIterator, Awaitable
 
-from . import explain, llm, scoring
-from .config import settings
+from . import explain, guard, llm, scoring
+from .config import AUTHOR_MODELS, settings
 from .extract import extract
 from .models import (AlibiResult, CheckRequest, CitationResult, Claim, FameResult, PhantomResult,
                      ReinterrogationResult)
 from .sensors import alibi, citations, fame, phantom, reinterrogate
+
+AUTHOR_MODEL_IDS = {m["id"] for m in AUTHOR_MODELS}
 
 SENSOR_ERROR = {
     "alibi": lambda msg: AlibiResult(status="error", note=msg),
@@ -33,6 +35,7 @@ def _dump(x):
 async def check(req: CheckRequest) -> AsyncIterator[dict]:
     usage = llm.Usage()
     token = llm.current_usage.set(usage)
+    slots_token = llm.request_slots.set(llm.new_request_slots())
     started = time.time()
     try:
         try:
@@ -49,9 +52,23 @@ async def check(req: CheckRequest) -> AsyncIterator[dict]:
         })
     finally:
         try:
+            await guard.record_spend(usage.cost_usd)
+        except Exception:
+            pass
+        try:
             llm.current_usage.reset(token)
+            llm.request_slots.reset(slots_token)
         except ValueError:  # generator finalized in another context (client disconnected)
             pass
+
+
+NOT_NEEDED = "not_needed"   # sensor skipped by the cascade: the sources already settled the claim
+
+
+def _same_claim(a: Claim, b: Claim) -> bool:
+    """A claim started while extraction was streaming is reused only if the final build made the same claim."""
+    skip = {"citation_ids"}
+    return a.model_dump(exclude=skip) == b.model_dump(exclude=skip)
 
 
 async def _check(req: CheckRequest) -> AsyncIterator[dict]:
@@ -66,75 +83,133 @@ async def _check(req: CheckRequest) -> AsyncIterator[dict]:
                                "message": "OPENROUTER_API_KEY is not set on the server (see .env.example)."})
         return
 
-    yield _event("status", {"stage": "extract", "truncated": truncated})
-    try:
-        lang, claims, cits = await extract(text, req.question)
-    except llm.LLMError as e:
-        yield _event("error", {"code": "extract_failed", "message": str(e)})
-        return
-    yield _event("claims", {"lang": lang, "text": text, "claims": _dump(claims), "citations": _dump(cits)})
-    if not claims:
-        return
-
     deep = req.mode == "deep"
     ui = req.ui_lang
+    author = req.author_model if req.author_model in AUTHOR_MODEL_IDS else None
     queue: asyncio.Queue = asyncio.Queue()
-    results: dict[str, dict[str, Any]] = {c.id: {} for c in claims}
-    cit_results: list[CitationResult] | None = None
+    flows: dict[str, tuple[Claim, asyncio.Task]] = {}      # claim id -> (claim, its sensor flow)
+    decisions: dict[str, asyncio.Future] = {}             # claim id -> True if the sources settled it
+    loop = asyncio.get_running_loop()
 
-    async def guard(kind: str, claim_id: str | None, coro: Awaitable) -> None:
+    async def sensor(kind: str, claim: Claim, coro: Awaitable):
         try:
-            res = await coro
+            return await coro
         except Exception as e:  # a crashing sensor must never block the verdict
-            if kind in SENSOR_ERROR:
-                res = SENSOR_ERROR[kind](f"sensor crashed: {e}")
-            elif kind == "phantom":
-                res = {c.id: PhantomResult(status="error", note=f"sensor crashed: {e}") for c in claims}
-            else:
-                res = []
-        await queue.put((kind, claim_id, res))
+            return SENSOR_ERROR[kind](f"sensor crashed: {e}")
 
-    tasks = []
-    checkable = [c for c in claims if c.checkable]
-    for c in checkable:
-        tasks.append(guard("alibi", c.id, alibi.run(c)))
-        tasks.append(guard("fame", c.id, fame.run(c)))
-        if deep:
-            tasks.append(guard("reinterrogation", c.id, reinterrogate.run(c)))
-    if deep and checkable:
-        tasks.append(guard("phantom", None, phantom.run_batch(checkable, req.author_model)))
-    tasks.append(guard("citations", None, citations.run(cits, claims)))
-    running = [asyncio.create_task(t) for t in tasks]
+    async def claim_flow(c: Claim, decided: asyncio.Future) -> None:
+        """Alibi and Fame first; the paid witness checks only if the sources did not settle the claim."""
+        async def fame_part():
+            await queue.put((c.id, "fame", await sensor("fame", c, fame.run(c))))
+        fame_task = asyncio.create_task(fame_part())
+        try:
+            a = await sensor("alibi", c, alibi.run(c))
+            await queue.put((c.id, "alibi", a))
+            settled = deep and settings.cascade and scoring.decided_by_sources(a)
+            if not decided.done():
+                decided.set_result(settled)
+            if deep and settled:
+                await queue.put((c.id, "reinterrogation", ReinterrogationResult(status="skipped", note=NOT_NEEDED)))
+                await queue.put((c.id, "phantom", PhantomResult(status="skipped", note=NOT_NEEDED)))
+            elif deep:
+                await queue.put((c.id, "reinterrogation", await sensor("reinterrogation", c, reinterrogate.run(c))))
+            await fame_task
+        finally:
+            fame_task.cancel()
 
-    required = {"alibi", "fame"} | ({"reinterrogation", "phantom"} if deep else set())
-    done_claims: set[str] = set()
+    def start(c: Claim) -> None:
+        if not c.checkable or c.id in flows:
+            return
+        decisions[c.id] = loop.create_future()
+        flows[c.id] = (c, asyncio.create_task(claim_flow(c, decisions[c.id])))
 
-    # Non-checkable claims get their verdict immediately.
-    for c in claims:
-        if not c.checkable:
-            done_claims.add(c.id)
-            v = explain.build_verdict(c, "not_checkable", None, {}, AlibiResult(status="skipped"),
-                                      ReinterrogationResult(status="skipped"), PhantomResult(status="skipped"),
-                                      FameResult(status="skipped"), [], ui)
-            yield _event("verdict", _dump(v))
-
-    def ready(c: Claim) -> bool:
-        return cit_results is not None and required <= results[c.id].keys()
+    def stop(cid: str) -> None:
+        claim, task = flows.pop(cid)
+        task.cancel()
+        decisions.pop(cid, None)
 
     try:
-        for _ in range(len(running)):
-            kind, claim_id, res = await queue.get()
-            if kind == "phantom":
-                for cid, r in res.items():
-                    if cid in results:
-                        results[cid]["phantom"] = r
-                        yield _event("sensor", {"claim_id": cid, "sensor": "phantom", "result": _dump(r)})
-            elif kind == "citations":
+        yield _event("status", {"stage": "extract", "truncated": truncated})
+        try:
+            lang, claims, cits = await extract(text, req.question, on_claim=start)
+        except llm.LLMError as e:
+            yield _event("error", {"code": "extract_failed", "message": str(e)})
+            return
+        # Keep the checks started during streaming only where the final claim is identical.
+        final = {c.id: c for c in claims}
+        for cid in list(flows):
+            if cid not in final or not final[cid].checkable or not _same_claim(flows[cid][0], final[cid]):
+                stop(cid)
+        kept = []
+        while not queue.empty():   # results of stopped flows must not reach the user
+            item = queue.get_nowait()
+            if item[0] in flows:
+                kept.append(item)
+        for item in kept:
+            queue.put_nowait(item)
+        for c in claims:
+            start(c)
+
+        yield _event("claims", {"lang": lang, "text": text, "claims": _dump(claims), "citations": _dump(cits)})
+        if not claims:
+            return
+
+        async def citations_part():
+            try:
+                res = await citations.run(cits, claims)
+            except Exception:
+                res = []
+            await queue.put((None, "citations", res))
+
+        async def phantom_part():
+            settled = await asyncio.gather(*[decisions[c.id] for c in checkable])
+            open_claims = [c for c, done in zip(checkable, settled) if not done]
+            if not open_claims:
+                return
+            try:
+                res = await phantom.run_batch(open_claims, author)
+            except Exception as e:
+                res = {c.id: PhantomResult(status="error", note=f"sensor crashed: {e}") for c in open_claims}
+            for cid, r in res.items():
+                await queue.put((cid, "phantom", r))
+
+        checkable = [c for c in claims if c.checkable]
+        workers = [task for _, task in flows.values()] + [asyncio.create_task(citations_part())]
+        if deep and checkable:
+            workers.append(asyncio.create_task(phantom_part()))
+
+        async def close_queue():
+            await asyncio.gather(*workers, return_exceptions=True)
+            await queue.put(None)
+        closer = asyncio.create_task(close_queue())
+
+        results: dict[str, dict[str, Any]] = {c.id: {} for c in claims}
+        cit_results: list[CitationResult] | None = None
+        required = {"alibi", "fame"} | ({"reinterrogation", "phantom"} if deep else set())
+        has_refs = {c.id: any(c.id in r.claim_ids for r in cits) for c in claims}
+        done_claims: set[str] = set()
+
+        # Non-checkable claims get their verdict immediately.
+        for c in claims:
+            if not c.checkable:
+                done_claims.add(c.id)
+                v = explain.build_verdict(c, "not_checkable", None, {}, AlibiResult(status="skipped"),
+                                          ReinterrogationResult(status="skipped"), PhantomResult(status="skipped"),
+                                          FameResult(status="skipped"), [], ui)
+                yield _event("verdict", _dump(v))
+
+        def ready(c: Claim) -> bool:
+            # A claim without references never waits for other claims' references to be checked.
+            return required <= results[c.id].keys() and (cit_results is not None or not has_refs[c.id])
+
+        while (item := await queue.get()) is not None:
+            claim_id, kind, res = item
+            if kind == "citations":
                 cit_results = res
-                for c in cit_results:
-                    c.reason = explain.citation_reason(c, ui)
+                for r in cit_results:
+                    r.reason = explain.citation_reason(r, ui)
                 yield _event("citations", _dump(res))
-            else:
+            elif claim_id in results:
                 results[claim_id][kind] = res
                 yield _event("sensor", {"claim_id": claim_id, "sensor": kind, "result": _dump(res)})
 
@@ -145,13 +220,14 @@ async def _check(req: CheckRequest) -> AsyncIterator[dict]:
                 r = results[c.id]
                 rei = r.get("reinterrogation") or ReinterrogationResult(status="skipped", note="quick mode")
                 ph = r.get("phantom") or PhantomResult(status="skipped", note="quick mode")
-                my_cits = [x for x in cit_results if c.id in x.claim_ids]
+                my_cits = [x for x in (cit_results or []) if c.id in x.claim_ids]
                 feats = scoring.features(c, r["alibi"], rei, ph, r["fame"], my_cits)
                 p = scoring.probability(feats)
                 label = scoring.label_for(p, feats)
                 v = explain.build_verdict(c, label, p, feats, r["alibi"], rei, ph, r["fame"], my_cits, ui)
                 yield _event("verdict", _dump(v))
+        await closer
     finally:
-        for t in running:
-            if not t.done():
-                t.cancel()
+        for _, task in list(flows.values()):
+            if not task.done():
+                task.cancel()

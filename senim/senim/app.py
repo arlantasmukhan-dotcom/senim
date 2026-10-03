@@ -7,23 +7,15 @@ import json
 import os
 from contextlib import asynccontextmanager
 
-from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
-from . import net, pipeline, scoring
-from .config import PROJECT_ROOT, settings
+from . import guard, net, pipeline, scoring, store
+from .config import AUTHOR_MODELS, PROJECT_ROOT, settings
 from .models import CheckRequest
 
 STATIC = PROJECT_ROOT / "static"
-
-# Models the user can pick as "the AI that wrote this answer" (used by the Phantom Twin sensor).
-AUTHOR_MODELS = [
-    {"id": "openai/gpt-6-luna", "label": "ChatGPT"},
-    {"id": "google/gemini-3.5-flash-lite", "label": "Gemini"},
-    {"id": "anthropic/claude-haiku-4.5", "label": "Claude"},
-    {"id": "deepseek/deepseek-v4-flash", "label": "DeepSeek"},
-]
 
 
 @asynccontextmanager
@@ -64,6 +56,9 @@ async def health():
         "author_models": AUTHOR_MODELS,
         "weights": scoring.load_weights()[1],
         "max_input_chars": settings.max_input_chars,
+        "shared_store": store.shared(),
+        "rate_limit_per_hour": settings.rate_limit_per_hour,
+        "daily_budget_usd": settings.daily_budget_usd,
     }
 
 
@@ -71,9 +66,23 @@ def _sse(ev: dict) -> str:
     return f"event: {ev['event']}\ndata: {json.dumps(ev['data'], ensure_ascii=False)}\n\n"
 
 
+def client_ip(request: Request) -> str:
+    """The web app forwards the visitor's IP. Trust that header only from our own web app: it carries the
+    proxy token (public deployments) or runs on this machine (local / share.sh tunnel)."""
+    peer = request.client.host if request.client else ""
+    forwarded = (request.headers.get("x-senim-client-ip") or "").strip()
+    trusted = bool(os.environ.get("SENIM_PROXY_TOKEN")) or guard.is_local(peer)
+    return forwarded if forwarded and trusted else peer
+
+
 @app.post("/api/check", dependencies=[Depends(require_proxy_token)])
-async def check(req: CheckRequest):
+async def check(req: CheckRequest, request: Request):
+    refused = await guard.admit(client_ip(request))
+
     async def stream():
+        if refused:
+            yield _sse({"event": "error", "data": {"code": refused, "message": ""}})
+            return
         async for ev in pipeline.check(req):
             yield _sse(ev)
 

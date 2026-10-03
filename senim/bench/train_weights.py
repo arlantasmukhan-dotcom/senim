@@ -20,11 +20,11 @@ from .metrics import cross_validate, fit_logreg, predict, prf
 FEATURES_FILE = Path(__file__).parent / "out" / "features.jsonl"
 
 
-def load(path: Path) -> tuple[list[list[float]], list[int]]:
+def load(path: Path, split: str | None = None) -> tuple[list[list[float]], list[int]]:
     X, y = [], []
     for line in path.read_text(encoding="utf-8").splitlines():
         r = json.loads(line)
-        if r.get("gold") not in ("true", "false"):
+        if r.get("gold") not in ("true", "false") or (split and r.get("split") != split):
             continue
         X.append([float(r["features"].get(k, 0.0)) for k in scoring.FEATURES])
         y.append(1 if r["gold"] == "false" else 0)
@@ -38,7 +38,9 @@ def main() -> None:
     ap.add_argument("--dry-run", action="store_true", help="report only, don't write weights.json")
     args = ap.parse_args()
 
-    X, y = load(Path(args.features))
+    # With a held-out split, fit on "dev" only and report on "test", which the weights never saw.
+    X_test, y_test = load(Path(args.features), "test")
+    X, y = load(Path(args.features), "dev" if X_test else None)
     if len(X) < 10 or len(set(y)) < 2:
         raise SystemExit(f"Need at least 10 labeled claims with both labels; got {len(X)}.")
 
@@ -51,6 +53,14 @@ def main() -> None:
     b, w = fit_logreg(X, y, l2=args.l2)
     weights = {"bias": round(b, 4), **{k: round(v, 4) for k, v in zip(scoring.FEATURES, w)}}
     print("fitted weights:", json.dumps(weights, indent=2))
+    held_out = None
+    if X_test:
+        held_out = {
+            "default_priors": prf(y_test, [1 if predict(d["bias"], [d[k] for k in scoring.FEATURES], x) >= 0.5 else 0
+                                           for x in X_test]),
+            "trained": prf(y_test, [1 if predict(b, w, x) >= 0.5 else 0 for x in X_test]),
+        }
+        print("held-out test (never used for fitting):", json.dumps(held_out, indent=2))
     if len(X) < 100:
         print(f"⚠️ Only {len(X)} examples — weights will be noisy. Label more claims (target: 200).")
     if args.dry_run:
@@ -60,6 +70,7 @@ def main() -> None:
         "weights": weights,
         "source": f"KazTruth n={len(X)} ({date.today().isoformat()})",
         "cross_validation": cv,
+        **({"held_out_test": held_out} if held_out else {}),
     }, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"saved → {out}")
 

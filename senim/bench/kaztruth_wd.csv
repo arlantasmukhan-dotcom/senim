@@ -1,0 +1,198 @@
+id,lang,claim,label,source_url,notes,kind,popularity,split
+wd001,ru,Организация «Казахский национальный исследовательский технический университет имени К. И. Сатпаева» основана в 1934 году.,true,https://www.wikidata.org/entity/Q1513804,,founded,known,dev
+wd002,ru,Булат Жолдасович Есмагамбетов родился в городе Аральск.,true,https://www.wikidata.org/entity/Q4938954,,place,rare,test
+wd003,ru,Уки Ажиевич Ажиев умер в 2014 году.,false,https://www.wikidata.org/entity/Q12577382,mutated death (Wikidata: 2015),death,rare,dev
+wd004,ru,Дмитрий Непогодов родился в 1988 году.,true,https://www.wikidata.org/entity/Q2667308,,birth,known,test
+wd005,kk,Ақсу 2018 жылы құрылған.,true,https://www.wikidata.org/entity/Q65250119,,founded,known,dev
+wd006,en,Valeri Liukin was born in 1978.,false,https://www.wikidata.org/entity/Q558567,mutated birth (Wikidata: 1966),birth,famous,test
+wd007,ru,Инна Юрьевна Шешкиль родилась в 1971 году.,true,https://www.wikidata.org/entity/Q452956,,birth,known,test
+wd008,ru,Организация «Женис» основана в 1964 году.,true,https://www.wikidata.org/entity/Q753004,,founded,famous,dev
+wd009,kk,Дариға Нұрсұлтанқызы Назарбаева 1963 жылы туған.,true,https://www.wikidata.org/entity/Q376532,,birth,famous,dev
+wd010,kk,Бақыт Амангелдіұлы Дүйсенбаев 1969 жылы туған.,false,https://www.wikidata.org/entity/Q2658743,mutated birth (Wikidata: 1970),birth,rare,dev
+wd011,kk,Балуан Шолақ 1919 жылы қайтыс болған.,true,https://www.wikidata.org/entity/Q4076987,,death,known,test
+wd012,ru,Нурлан Орынбасарович Дулатбеков родился в 1962 году.,true,https://www.wikidata.org/entity/Q4170429,,birth,rare,dev
+wd013,kk,Төлепберген Тұрсынұлы Байсақалов 1962 жылы туған.,false,https://www.wikidata.org/entity/Q4075723,mutated birth (Wikidata: 1974),birth,rare,dev
+wd014,ru,Батырхан Камалович Шукенов умер в 2010 году.,false,https://www.wikidata.org/entity/Q4527444,mutated death (Wikidata: 2015),death,known,test
+wd015,ru,Юрий Алексеевич Новиков родился в 1974 году.,false,https://www.wikidata.org/entity/Q4322721,mutated birth (Wikidata: 1972),birth,rare,dev
+wd016,kk,Азамат Сатыбалды 1979 жылы туған.,false,https://www.wikidata.org/entity/Q20482546,mutated birth (Wikidata: 1977),birth,rare,dev
+wd017,ru,Нурлан Байузакович Ермекбаев родился в городе Шымкент.,true,https://www.wikidata.org/entity/Q1775487,,place,known,test
+wd018,ru,Алмас Баймуханович Ордабаев умер в 2023 году.,false,https://www.wikidata.org/entity/Q12528467,mutated death (Wikidata: 2026),death,rare,test
+wd019,kk,Руслан Мырсатаев 1987 жылы туған.,false,https://www.wikidata.org/entity/Q3428515,mutated birth (Wikidata: 1985),birth,known,dev
+wd020,ru,Сырбай Мауленов родился в 1922 году.,true,https://www.wikidata.org/entity/Q4285535,,birth,rare,dev
+wd021,en,Sahan Dosova died in 2009.,true,https://www.wikidata.org/entity/Q1076093,,death,known,dev
+wd022,ru,Сергей Григорьев родился в городе Алма-Ата.,true,https://www.wikidata.org/entity/Q38058306,,place,rare,test
+wd023,ru,Организация «Северо-Казахстанский государственный университет» основана в 1937 году.,true,https://www.wikidata.org/entity/Q4412495,,founded,rare,test
+wd024,en,Kazakh National Medical University was founded in 1931.,true,https://www.wikidata.org/entity/Q4208094,,founded,known,test
+wd025,ru,Организация «Дом-музей Кунаева» основана в 2002 году.,true,https://www.wikidata.org/entity/Q25498984,,founded,rare,test
+wd026,kk,Қайсар ФК 1968 жылы құрылған.,true,https://www.wikidata.org/entity/Q740568,,founded,famous,test
+wd027,ru,Елена Александровна Лиховцева родилась в 1970 году.,false,https://www.wikidata.org/entity/Q233231,mutated birth (Wikidata: 1975),birth,famous,test
+wd028,en,A. Kasteyev State Museum of Arts was founded in 1976.,true,https://www.wikidata.org/entity/Q2324596,,founded,known,dev
+wd029,ru,Франческа Альфредовна Ярбусова родилась в 1942 году.,true,https://www.wikidata.org/entity/Q1972850,,birth,known,test
+wd030,kk,Алматы ФК 2000 жылы құрылған.,true,https://www.wikidata.org/entity/Q24360,,founded,known,dev
+wd031,en,Abai Literary Memorial Museum was founded in 1942.,false,https://www.wikidata.org/entity/Q304797,mutated founded (Wikidata: 1940),founded,rare,test
+wd032,ru,Турганбай Нурланович Досжанов умер в 2019 году.,true,https://www.wikidata.org/entity/Q16436085,,death,rare,dev
+wd033,ru,Амин Елемисович Туяков родился в городе Кызылорда.,false,https://www.wikidata.org/entity/Q16433516,mutated place (Wikidata: Атырау),place,rare,dev
+wd034,ru,Ольга Васильевна Шишигина родилась в городе Талдыкорган.,false,https://www.wikidata.org/entity/Q254132,mutated place (Wikidata: Алма-Ата),place,famous,dev
+wd035,ru,Галина Воскобоева родилась в 1981 году.,false,https://www.wikidata.org/entity/Q234831,mutated birth (Wikidata: 1984),birth,famous,dev
+wd036,kk,Антон Рохусович Шох Тараз қаласында туған.,true,https://www.wikidata.org/entity/Q2036001,,place,known,dev
+wd037,kk,Ферро 1996 жылы құрылған.,false,https://www.wikidata.org/entity/Q65250593,mutated founded (Wikidata: 1993),founded,rare,dev
+wd038,kk,Галиб Мұсаұлы Жафаров 1978 жылы туған.,true,https://www.wikidata.org/entity/Q899510,,birth,known,dev
+wd039,en,Alexandra Elbakyan was born in the city of Korday.,false,https://www.wikidata.org/entity/Q21996568,mutated place (Wikidata: Almaty),place,famous,dev
+wd040,kk,Коцур Павел Михайлович Астана қаласында туған.,true,https://www.wikidata.org/entity/Q115303,,place,known,dev
+wd041,en,FC Aktobe was founded in 1967.,true,https://www.wikidata.org/entity/Q194170,,founded,famous,test
+wd042,ru,Асыгат Асиевич Жабагин умер в 2023 году.,true,https://www.wikidata.org/entity/Q18634314,,death,rare,dev
+wd043,ru,Анатолий Михайлович Храпатый умер в 2007 году.,false,https://www.wikidata.org/entity/Q382518,mutated death (Wikidata: 2008),death,known,dev
+wd044,en,Kazakh Academy of Transport and Communications named after M.Tynyshpaev was founded in 1931.,true,https://www.wikidata.org/entity/Q4208076,,founded,rare,dev
+wd045,ru,Нуркожа Кайпанов родился в 1998 году.,true,https://www.wikidata.org/entity/Q65167777,,birth,known,dev
+wd046,en,Gaziza Zhubanova died in 1993.,true,https://www.wikidata.org/entity/Q1491329,,death,known,dev
+wd047,ru,Организация «Казкоммерцбанк» основана в 1991 году.,true,https://www.wikidata.org/entity/Q1168179,,founded,known,test
+wd048,en,Akmola Regional Museum of History and Local Lore was founded in 1920.,true,https://www.wikidata.org/entity/Q12531853,,founded,rare,test
+wd049,ru,Димаш Кудайберген родился в 2006 году.,false,https://www.wikidata.org/entity/Q25501424,mutated birth (Wikidata: 1994),birth,famous,test
+wd050,ru,Антон Рохусович Шох умер в 2009 году.,true,https://www.wikidata.org/entity/Q2036001,,death,known,dev
+wd051,en,Alexandra Elbakyan was born in 1985.,false,https://www.wikidata.org/entity/Q21996568,mutated birth (Wikidata: 1988),birth,famous,dev
+wd052,ru,Курманбек Тажмаханбетович Жантасов родился в городе Жезказган.,false,https://www.wikidata.org/entity/Q12577045,mutated place (Wikidata: Шымкент),place,rare,test
+wd053,ru,Булат Абдрахманович Баекенов умер в 2023 году.,true,https://www.wikidata.org/entity/Q4075062,,death,rare,dev
+wd054,ru,Маргулан Асембеков родился в 1983 году.,true,https://www.wikidata.org/entity/Q16574710,,birth,rare,test
+wd055,kk,Евгений Викторович Набоков Талдықорған қаласында туған.,false,https://www.wikidata.org/entity/Q390913,mutated place (Wikidata: Өскемен),place,famous,test
+wd056,kk,Галиб Мұсаұлы Жафаров Қаскелең қаласында туған.,false,https://www.wikidata.org/entity/Q899510,mutated place (Wikidata: Ақтөбе),place,known,test
+wd057,en,Aleksandr Khapsalis was born in the city of Ridder.,false,https://www.wikidata.org/entity/Q2641225,mutated place (Wikidata: Talgar),place,known,dev
+wd058,ru,Антон Рохусович Шох родился в 1970 году.,false,https://www.wikidata.org/entity/Q2036001,mutated birth (Wikidata: 1960),birth,known,dev
+wd059,kk,Сұлтанғазин Өмірзақ Махмұтұлы 2005 жылы қайтыс болған.,true,https://www.wikidata.org/entity/Q4445698,,death,known,dev
+wd060,ru,Махмут Марипович Дараев умер в 2011 году.,false,https://www.wikidata.org/entity/Q12553175,mutated death (Wikidata: 2023),death,rare,test
+wd061,ru,Елдос Бахтыбаевич Сметов родился в 1992 году.,true,https://www.wikidata.org/entity/Q18233425,,birth,famous,test
+wd062,ru,Нурлан Байузакович Ермекбаев родился в 1966 году.,false,https://www.wikidata.org/entity/Q1775487,mutated birth (Wikidata: 1963),birth,known,dev
+wd063,ru,Совет Шпекбаевич Жаксыбеков умер в 2009 году.,false,https://www.wikidata.org/entity/Q16435952,mutated death (Wikidata: 2014),death,rare,dev
+wd064,en,Gulsum Asfendiyarova died in 1941.,true,https://www.wikidata.org/entity/Q12530219,,death,known,dev
+wd065,kk,Сергей Николаевич Беляев 2015 жылы қайтыс болған.,false,https://www.wikidata.org/entity/Q4083471,mutated death (Wikidata: 2020),death,known,dev
+wd066,ru,Сабина Аширбаева родилась в городе Жезказган.,false,https://www.wikidata.org/entity/Q21004876,mutated place (Wikidata: Шымкент),place,rare,test
+wd067,ru,Денис Игоревич Малинин родился в городе Павлодар.,true,https://www.wikidata.org/entity/Q584510,,place,rare,dev
+wd068,kk,Сағдиев Мақтай Рамазанұлы 2002 жылы қайтыс болған.,false,https://www.wikidata.org/entity/Q4404424,mutated death (Wikidata: 2012),death,rare,test
+wd069,en,FC Shakhter Karagandy was founded in 1958.,true,https://www.wikidata.org/entity/Q740666,,founded,famous,dev
+wd070,ru,Организация «SDU University» основана в 1996 году.,true,https://www.wikidata.org/entity/Q2370088,,founded,known,dev
+wd071,kk,Садықов Тоқмұхамед Сәлменұлы 2006 жылы қайтыс болған.,false,https://www.wikidata.org/entity/Q12560561,mutated death (Wikidata: 2009),death,rare,dev
+wd072,en,FC Bolat was founded in 1966.,true,https://www.wikidata.org/entity/Q891262,,founded,known,dev
+wd073,ru,Степан Астафьев родился в 1993 году.,false,https://www.wikidata.org/entity/Q21001335,mutated birth (Wikidata: 1994),birth,rare,test
+wd074,kk,Оқжетпес ФК 1968 жылы құрылған.,true,https://www.wikidata.org/entity/Q931971,,founded,famous,test
+wd075,kk,Садықов Тоқмұхамед Сәлменұлы 1941 жылы туған.,false,https://www.wikidata.org/entity/Q12560561,mutated birth (Wikidata: 1938),birth,rare,dev
+wd076,kk,Темірбанк 1992 жылы құрылған.,true,https://www.wikidata.org/entity/Q648059,,founded,rare,dev
+wd077,kk,Аспандиярова Гүлсім Жафарқызы 1880 жылы туған.,true,https://www.wikidata.org/entity/Q12530219,,birth,known,dev
+wd078,en,Zamanbek Nurkadilov died in 2002.,false,https://www.wikidata.org/entity/Q1087691,mutated death (Wikidata: 2005),death,known,dev
+wd079,ru,Денис Игоревич Малинин родился в 1982 году.,false,https://www.wikidata.org/entity/Q584510,mutated birth (Wikidata: 1983),birth,rare,test
+wd080,kk,Татьяна Дмитриевна Лесовая 1957 жылы туған.,false,https://www.wikidata.org/entity/Q441386,mutated birth (Wikidata: 1956),birth,known,test
+wd081,en,Zarina Diyas was born in 1993.,true,https://www.wikidata.org/entity/Q2466357,,birth,famous,dev
+wd082,ru,Борис Викторович Александров родился в 1965 году.,false,https://www.wikidata.org/entity/Q893800,mutated birth (Wikidata: 1955),birth,known,test
+wd083,kk,Дінмұхамед Ахметұлы Қонаев 1981 жылы қайтыс болған.,false,https://www.wikidata.org/entity/Q1226580,mutated death (Wikidata: 1993),death,famous,test
+wd084,ru,Организация «Жетысу» основана в 1993 году.,false,https://www.wikidata.org/entity/Q546557,mutated founded (Wikidata: 1981),founded,famous,test
+wd085,en,FC Gefest was founded in 2008.,true,https://www.wikidata.org/entity/Q798143,,founded,rare,dev
+wd086,ru,Борис Викторович Александров родился в городе Усть-Каменогорск.,true,https://www.wikidata.org/entity/Q893800,,place,known,dev
+wd087,en,Saken Bibossinov was born in 1997.,true,https://www.wikidata.org/entity/Q68045840,,birth,known,dev
+wd088,ru,Олжас Абаевич Бектенов родился в 1970 году.,false,https://www.wikidata.org/entity/Q124436646,mutated birth (Wikidata: 1980),birth,famous,dev
+wd089,ru,Динмухамед Ахмедович Кунаев родился в городе Алма-Ата.,true,https://www.wikidata.org/entity/Q1226580,,place,famous,dev
+wd090,en,FC Ekibastuzets was founded in 1979.,true,https://www.wikidata.org/entity/Q2615094,,founded,known,test
+wd091,ru,Татьяна Дмитриевна Лесовая родилась в городе Талдыкорган.,true,https://www.wikidata.org/entity/Q441386,,place,known,dev
+wd092,en,Dinmukhamed Konayev was born in 1912.,true,https://www.wikidata.org/entity/Q1226580,,birth,famous,dev
+wd093,en,Dmitri Shomko was born in the city of Ekibastuz.,true,https://www.wikidata.org/entity/Q964931,,place,known,dev
+wd094,en,Khiuaz Dospanova died in 2008.,true,https://www.wikidata.org/entity/Q3197271,,death,famous,test
+wd095,en,Andrey Kivilev died in 2015.,false,https://www.wikidata.org/entity/Q502203,mutated death (Wikidata: 2003),death,known,dev
+wd096,ru,Александр Меркель родился в городе Кокшетау.,false,https://www.wikidata.org/entity/Q327205,mutated place (Wikidata: Алма-Ата),place,famous,test
+wd097,kk,Владимир Смирнов 1964 жылы туған.,true,https://www.wikidata.org/entity/Q560383,,birth,famous,dev
+wd098,en,Żandos Ismaiłow was born in 1991.,false,https://www.wikidata.org/entity/Q30231139,mutated birth (Wikidata: 1994),birth,rare,dev
+wd099,kk,Марғұлан Ержанұлы Әсембеков Ақсу қаласында туған.,false,https://www.wikidata.org/entity/Q16574710,mutated place (Wikidata: Алматы),place,rare,dev
+wd100,en,Amin Tuyakov was born in 1937.,true,https://www.wikidata.org/entity/Q16433516,,birth,rare,test
+wd101,ru,Бакыт Амангельдинович Дюсенбаев родился в городе Петропавловск.,true,https://www.wikidata.org/entity/Q2658743,,place,rare,test
+wd102,ru,Дарига Нурсултановна Назарбаева родилась в городе Темиртау.,true,https://www.wikidata.org/entity/Q376532,,place,famous,dev
+wd103,kk,Қарақұлов Ишанбай 1992 жылы қайтыс болған.,true,https://www.wikidata.org/entity/Q55105191,,death,rare,dev
+wd104,en,Aleksandr Khapsalis was born in 1957.,true,https://www.wikidata.org/entity/Q2641225,,birth,known,dev
+wd105,kk,Қарағанды Облыстық Тарихи-Өлкетану Мұражайы 1929 жылы құрылған.,true,https://www.wikidata.org/entity/Q16661582,,founded,rare,dev
+wd106,en,FC Altai Semey was founded in 2018.,false,https://www.wikidata.org/entity/Q23057839,mutated founded (Wikidata: 2016),founded,known,dev
+wd107,ru,Организация «Восточно-Казахстанский государственный университет имени С. Аманжолова» основана в 1962 году.,false,https://www.wikidata.org/entity/Q4126490,mutated founded (Wikidata: 1952),founded,rare,test
+wd108,ru,Организация «2022) Елимай (футбольный клуб» основана в 2017 году.,false,https://www.wikidata.org/entity/Q120081555,mutated founded (Wikidata: 2022),founded,known,test
+wd109,ru,Организация «Мемориальный музей Тлендиева» основана в 2014 году.,true,https://www.wikidata.org/entity/Q60853376,,founded,rare,test
+wd110,ru,Айдын Аканович Аимбетов родился в 1969 году.,false,https://www.wikidata.org/entity/Q4831087,mutated birth (Wikidata: 1972),birth,famous,test
+wd111,en,Dmitriy Dudarev was born in 1977.,false,https://www.wikidata.org/entity/Q435078,mutated birth (Wikidata: 1976),birth,rare,dev
+wd112,ru,Организация «Казахский музыкально-драматический театр имени К. Куанышбаева» основана в 1994 году.,false,https://www.wikidata.org/entity/Q12530274,mutated founded (Wikidata: 1991),founded,rare,dev
+wd113,ru,Организация «Международный казахско-турецкий университет имени Х. А. Яссави» основана в 1981 году.,false,https://www.wikidata.org/entity/Q401546,mutated founded (Wikidata: 1991),founded,known,test
+wd114,en,Aziz Kalkamanuly was born in 1993.,true,https://www.wikidata.org/entity/Q19616575,,birth,rare,dev
+wd115,en,Stepan Astafyev was born in the city of Ayagoz.,false,https://www.wikidata.org/entity/Q21001335,mutated place (Wikidata: Petropavl),place,rare,dev
+wd116,ru,Дастин Бойд родился в 1998 году.,false,https://www.wikidata.org/entity/Q1267689,mutated birth (Wikidata: 1986),birth,known,dev
+wd117,ru,Николас Винокуров родился в 2003 году.,false,https://www.wikidata.org/entity/Q110872621,mutated birth (Wikidata: 2002),birth,known,test
+wd118,en,Al-Farabi Kazakh National University was founded in 1934.,true,https://www.wikidata.org/entity/Q427677,,founded,famous,test
+wd119,en,Yuri Novikov was born in the city of Balkhash.,false,https://www.wikidata.org/entity/Q4322721,mutated place (Wikidata: Pavlodar),place,rare,dev
+wd120,ru,Организация «Жетысу» основана в 1906 году.,false,https://www.wikidata.org/entity/Q12544787,mutated founded (Wikidata: 1918),founded,rare,test
+wd121,en,Eurasian Natural Resources Corporation was founded in 1984.,false,https://www.wikidata.org/entity/Q1374297,mutated founded (Wikidata: 1994),founded,known,test
+wd122,en,FC Maktaaral was founded in 2013.,false,https://www.wikidata.org/entity/Q18712404,mutated founded (Wikidata: 2011),founded,known,test
+wd123,ru,Газиза Ахметовна Жубанова родилась в 1937 году.,false,https://www.wikidata.org/entity/Q1491329,mutated birth (Wikidata: 1927),birth,known,test
+wd124,en,Kaspii Aqtau was founded in 1979.,true,https://www.wikidata.org/entity/Q1735177,,founded,known,test
+wd125,en,FC Dinamo Almaty was founded in 1937.,true,https://www.wikidata.org/entity/Q420613,,founded,known,dev
+wd126,kk,Мақпал Исабекова Жаркент қаласында туған.,true,https://www.wikidata.org/entity/Q921538,,place,known,dev
+wd127,en,Sergey Grigoryev was born in 1992.,true,https://www.wikidata.org/entity/Q38058306,,birth,rare,test
+wd128,en,FC Kazakhmys was founded in 2006.,true,https://www.wikidata.org/entity/Q1105789,,founded,known,test
+wd129,en,Aleksandr Miroshnichenko died in 2008.,false,https://www.wikidata.org/entity/Q717645,mutated death (Wikidata: 2003),death,known,test
+wd130,ru,Мария Сергеева родилась в 1993 году.,false,https://www.wikidata.org/entity/Q27560202,mutated birth (Wikidata: 1983),birth,rare,test
+wd131,kk,Валерий Викторович Люкин Талғар қаласында туған.,false,https://www.wikidata.org/entity/Q558567,mutated place (Wikidata: Ақтөбе),place,famous,dev
+wd132,kk,Төле Кенжебаев 1989 жылы қайтыс болған.,false,https://www.wikidata.org/entity/Q12567555,mutated death (Wikidata: 1988),death,rare,dev
+wd133,ru,Анатолий Николаевич Букреев умер в 1997 году.,true,https://www.wikidata.org/entity/Q487950,,death,famous,dev
+wd134,en,FC Atyrau was founded in 1968.,false,https://www.wikidata.org/entity/Q733451,mutated founded (Wikidata: 1978),founded,famous,dev
+wd135,ru,Талгат Амангельдиевич Мусабаев родился в 1951 году.,true,https://www.wikidata.org/entity/Q560360,,birth,famous,dev
+wd136,ru,Тамара Кузнецова родилась в 1987 году.,true,https://www.wikidata.org/entity/Q30068623,,birth,rare,dev
+wd137,kk,Астана Опера (театр) 2013 жылы құрылған.,true,https://www.wikidata.org/entity/Q21371563,,founded,famous,dev
+wd138,ru,Александр Меркель родился в 1992 году.,true,https://www.wikidata.org/entity/Q327205,,birth,famous,test
+wd139,ru,Турарбек Мажилович Асанов родился в 1951 году.,true,https://www.wikidata.org/entity/Q12567162,,birth,rare,dev
+wd140,ru,Организация «Музей редких книг» основана в 2010 году.,true,https://www.wikidata.org/entity/Q12562424,,founded,rare,dev
+wd141,ru,Талгатбек Абдрахманович Абдразаков умер в 2015 году.,true,https://www.wikidata.org/entity/Q12564488,,death,rare,test
+wd142,ru,Евгений Набоков родился в 1975 году.,true,https://www.wikidata.org/entity/Q390913,,birth,famous,dev
+wd143,en,Timur Baizhanov was born in the city of Almaty.,false,https://www.wikidata.org/entity/Q4075495,mutated place (Wikidata: Pavlodar),place,rare,test
+wd144,kk,Нұрсұлтан Әбішұлы Назарбаев 1940 жылы туған.,true,https://www.wikidata.org/entity/Q57394,,birth,famous,test
+wd145,ru,Асу Абайулы Алмабаев родился в 1991 году.,false,https://www.wikidata.org/entity/Q128803907,mutated birth (Wikidata: 1994),birth,rare,dev
+wd146,en,FC Irtysh Pavlodar was founded in 1964.,false,https://www.wikidata.org/entity/Q723483,mutated founded (Wikidata: 1965),founded,famous,dev
+wd147,ru,Сырбай Мауленов умер в 1991 году.,false,https://www.wikidata.org/entity/Q4285535,mutated death (Wikidata: 1993),death,rare,dev
+wd148,en,Abay Opera House was founded in 1934.,true,https://www.wikidata.org/entity/Q304839,,founded,known,test
+wd149,kk,Ермек Бекмұхамедұлы Серкебаев 2023 жылы қайтыс болған.,false,https://www.wikidata.org/entity/Q4417660,mutated death (Wikidata: 2013),death,known,dev
+wd150,en,Alina Kabaeva was born in 1985.,false,https://www.wikidata.org/entity/Q254220,mutated birth (Wikidata: 1983),birth,famous,dev
+wd151,en,Andrey Zeits was born in 1983.,false,https://www.wikidata.org/entity/Q502477,mutated birth (Wikidata: 1986),birth,known,dev
+wd152,ru,Куаныш Муратулы Калмуратов родился в 1996 году.,true,https://www.wikidata.org/entity/Q65250806,,birth,rare,test
+wd153,en,Zarina Diyas was born in the city of Kyzylorda.,false,https://www.wikidata.org/entity/Q2466357,mutated place (Wikidata: Almaty),place,famous,dev
+wd154,kk,Қабдеш Жұмаділов 2026 жылы қайтыс болған.,false,https://www.wikidata.org/entity/Q3277414,mutated death (Wikidata: 2021),death,rare,dev
+wd155,ru,Али Абдикаримович Бектаев родился в 1962 году.,true,https://www.wikidata.org/entity/Q25493939,,birth,rare,dev
+wd156,en,Nikolay Kulpin died in 2003.,true,https://www.wikidata.org/entity/Q4246579,,death,rare,dev
+wd157,kk,Тоқтар Оңғарбайұлы Әубәкіров 1946 жылы туған.,true,https://www.wikidata.org/entity/Q468258,,birth,famous,dev
+wd158,ru,Макпал Абдыманаповна Исабекова родилась в 1984 году.,true,https://www.wikidata.org/entity/Q921538,,birth,known,dev
+wd159,ru,Куаныш Муратулы Калмуратов родился в городе Атырау.,true,https://www.wikidata.org/entity/Q65250806,,place,rare,test
+wd160,en,Timur Baizhanov was born in 1980.,false,https://www.wikidata.org/entity/Q4075495,mutated birth (Wikidata: 1990),birth,rare,test
+wd161,ru,Илья Александрович Ильин родился в городе Конаев.,false,https://www.wikidata.org/entity/Q380247,mutated place (Wikidata: Кызылорда),place,famous,dev
+wd162,ru,Руслана Сергеевна Коршунова умерла в 2020 году.,false,https://www.wikidata.org/entity/Q232764,mutated death (Wikidata: 2008),death,famous,test
+wd163,kk,"Астана (футбол клубы, 2009) 2009 жылы құрылған.",true,https://www.wikidata.org/entity/Q779698,,founded,famous,test
+wd164,en,Russian Drama Theatre was founded in 1958.,true,https://www.wikidata.org/entity/Q12558041,,founded,rare,test
+wd165,en,Sabina Ashirbayeva was born in 1998.,true,https://www.wikidata.org/entity/Q21004876,,birth,rare,dev
+wd166,ru,Леонид Алексеевич Микитенко умер в 2019 году.,true,https://www.wikidata.org/entity/Q13749300,,death,known,dev
+wd167,ru,Жигер Закиров родился в 1992 году.,false,https://www.wikidata.org/entity/Q23642314,mutated birth (Wikidata: 1990),birth,rare,test
+wd168,ru,Руслан Жуматаевич Мырсатаев родился в городе Алма-Ата.,true,https://www.wikidata.org/entity/Q3428515,,place,known,test
+wd169,ru,Димаш Кудайберген родился в городе Актобе.,true,https://www.wikidata.org/entity/Q25501424,,place,famous,dev
+wd170,ru,Виктор Павлович Малышев родился в 1937 году.,true,https://www.wikidata.org/entity/Q12552651,,birth,rare,dev
+wd171,kk,Талғат Аманкелдіұлы Мұсабаев 2025 жылы қайтыс болған.,true,https://www.wikidata.org/entity/Q560360,,death,famous,test
+wd172,ru,Организация «БИИК (футбольный клуб)» основана в 2012 году.,true,https://www.wikidata.org/entity/Q4073929,,founded,rare,test
+wd173,kk,Дмитрий Викторович Дударев Қызылорда қаласында туған.,false,https://www.wikidata.org/entity/Q435078,mutated place (Wikidata: Өскемен),place,rare,test
+wd174,en,Express K was founded in 1921.,false,https://www.wikidata.org/entity/Q5350589,mutated founded (Wikidata: 1920),founded,rare,dev
+wd175,ru,Тамара Кузнецова родилась в городе Шымкент.,true,https://www.wikidata.org/entity/Q30068623,,place,rare,dev
+wd176,en,FC Avangard was founded in 2005.,true,https://www.wikidata.org/entity/Q5424828,,founded,rare,test
+wd177,en,BTA Bank was founded in 1993.,false,https://www.wikidata.org/entity/Q797060,mutated founded (Wikidata: 1991),founded,known,dev
+wd178,ru,Кайрат Камильевич Утабаев родился в 1968 году.,false,https://www.wikidata.org/entity/Q4478771,mutated birth (Wikidata: 1980),birth,known,dev
+wd179,ru,Андрей Зейц родился в городе Павлодар.,true,https://www.wikidata.org/entity/Q502477,,place,known,dev
+wd180,ru,Бекзат Сеилханович Саттарханов умер в 2000 году.,true,https://www.wikidata.org/entity/Q375085,,death,famous,dev
+wd181,en,FC Kairat was founded in 1954.,true,https://www.wikidata.org/entity/Q420594,,founded,famous,dev
+wd182,ru,Борис Викторович Александров умер в 2001 году.,false,https://www.wikidata.org/entity/Q893800,mutated death (Wikidata: 2002),death,known,dev
+wd183,ru,Арсланбек Сеитович Султанбеков родился в 1960 году.,false,https://www.wikidata.org/entity/Q6075874,mutated birth (Wikidata: 1965),birth,known,dev
+wd184,ru,Организация «Костанайский областной историко-краеведческий музей» основана в 1915 году.,true,https://www.wikidata.org/entity/Q25495183,,founded,rare,dev
+wd185,en,Varvara Massyagina was born in 1965.,false,https://www.wikidata.org/entity/Q19561421,mutated birth (Wikidata: 1977),birth,known,dev
+wd186,en,Grigoriy Yegorov was born in the city of Kyzylorda.,false,https://www.wikidata.org/entity/Q553574,mutated place (Wikidata: Shymkent),place,known,dev
+wd187,en,Olga Shishigina was born in 1968.,true,https://www.wikidata.org/entity/Q254132,,birth,famous,test
+wd188,kk,Коцур Павел Михайлович 1974 жылы туған.,true,https://www.wikidata.org/entity/Q115303,,birth,known,dev
+wd189,ru,Григорий Егоров родился в 1962 году.,false,https://www.wikidata.org/entity/Q553574,mutated birth (Wikidata: 1967),birth,known,dev
+wd190,ru,Дмитрий Андреевич Шомко родился в 1990 году.,true,https://www.wikidata.org/entity/Q964931,,birth,known,dev
+wd191,en,Denis Ten died in 2018.,true,https://www.wikidata.org/entity/Q981074,,death,famous,test
+wd192,ru,Варвара Геннадьевна Масягина родилась в городе Алма-Ата.,true,https://www.wikidata.org/entity/Q19561421,,place,known,dev
+wd193,kk,Бағдат Құлтайұлы Әміреев 1959 жылы туған.,true,https://www.wikidata.org/entity/Q15975377,,birth,known,test
+wd194,en,Inna Matveyeva was born in the city of Satpayev.,false,https://www.wikidata.org/entity/Q2348581,mutated place (Wikidata: Ridder),place,rare,test
+wd195,ru,Франческа Альфредовна Ярбусова родилась в городе Уральск.,false,https://www.wikidata.org/entity/Q1972850,mutated place (Wikidata: Алма-Ата),place,known,test
+wd196,ru,Низам DRedd родился в городе Алма-Ата.,true,https://www.wikidata.org/entity/Q118370056,,place,known,test
+wd197,ru,Илья Александрович Ильин родился в 1988 году.,true,https://www.wikidata.org/entity/Q380247,,birth,famous,dev

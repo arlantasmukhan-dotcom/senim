@@ -49,15 +49,15 @@ def eligible(claims: list[Claim]) -> list[Claim]:
 
 async def exists_on_wikipedia(name: str) -> bool | None:
     """True if the exact name has hits on kk/ru/en Wikipedia; None if Wikipedia could not be reached."""
+    replies = await asyncio.gather(*[net.get_json(f"https://{lang}.wikipedia.org/w/api.php", {
+        "action": "query", "list": "search", "srsearch": f'"{name}"', "srinfo": "totalhits",
+        "srlimit": 1, "format": "json",
+    }) for lang in ("kk", "ru", "en")], return_exceptions=True)
     reached = False
-    for lang in ("kk", "ru", "en"):
-        try:
-            status, data = await net.get_json(f"https://{lang}.wikipedia.org/w/api.php", {
-                "action": "query", "list": "search", "srsearch": f'"{name}"', "srinfo": "totalhits",
-                "srlimit": 1, "format": "json",
-            })
-        except Exception:
+    for reply in replies:
+        if isinstance(reply, Exception):
             continue
+        status, data = reply
         if status != 200 or not data:
             continue
         reached = True
@@ -102,7 +102,7 @@ async def run_batch(claims: list[Claim], target_model: str | None) -> dict[str, 
 
     listing = "\n".join(f"- claim_id {c.id} | entity: {c.entity} ({c.entity_kind}) | question: {c.question}" for c in picked)
     try:
-        data = await llm.chat_json(settings.model_main, [
+        data = await llm.chat_json(settings.model_fast, [   # a simple writing task: the cheap model is enough
             {"role": "system", "content": TWIN_SYSTEM},
             {"role": "user", "content": listing},
         ], temperature=0.8, max_tokens=1500)

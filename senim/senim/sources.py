@@ -65,17 +65,49 @@ def tier_of(url: str) -> int:
     return 4
 
 
+# Sites that republish Wikipedia articles: the same text, so never an independent confirmation.
+WIKI_MIRRORS = (
+    "wikiwand.com", "ruwiki.ru", "wiki2.org", "wiki2.wiki", "wikizero.com", "wikimili.com",
+    "wiki5.ru", "wikibrief.org", "dbpedia.org",
+)
+
+
 def registrable_domain(url: str) -> str:
-    """Collapse sub-domains so ru.wikipedia.org and kk.wikipedia.org count as ONE independent source."""
+    """The independent source behind a URL: sub-domains collapse (ru. and kk.wikipedia.org are one
+    source) and Wikipedia mirrors count as wikipedia.org."""
     host = domain_of(url)
+    if _matches(host, WIKI_MIRRORS):
+        return "wikipedia.org"
     parts = host.split(".")
     if len(parts) >= 3 and parts[-2] in {"gov", "edu", "com", "org", "ac", "co"}:
         return ".".join(parts[-3:])
     return ".".join(parts[-2:]) if len(parts) >= 2 else host
 
 
-# Extra, targeted searches for claim types where Kazakhstan has an official primary source.
-TYPE_DOMAINS: dict[str, list[str]] = {
-    "law": ["adilet.zan.kz"],
-    "number": ["stat.gov.kz", "gov.kz"],
+# The open web search skips Wikipedia (fetched free from its own API), its mirrors and low-trust sites.
+SEARCH_EXCLUDE = ("wikipedia.org",) + WIKI_MIRRORS + TIER4_LOW
+
+
+def excluded_from_search(url: str) -> bool:
+    return _matches(domain_of(url), SEARCH_EXCLUDE)
+
+
+# The second web search is limited to trusted sites picked for the claim type.
+_KZ_OFFICIAL = ["gov.kz", "akorda.kz", "parlam.kz", "adilet.zan.kz", "stat.gov.kz", "nationalbank.kz"]
+_REFERENCE = ["e-history.kz", "bigenc.ru", "britannica.com"]
+_INTERNATIONAL = ["un.org", "who.int", "worldbank.org", "imf.org", "oecd.org", "unesco.org"]
+_SCIENCE = ["nature.com", "science.org", "nih.gov", "thelancet.com", "nejm.org", "sciencedirect.com",
+            "springer.com", "arxiv.org"]
+_NEWS = list(TIER3_SUFFIXES)
+
+TRUSTED_FOR_TYPE: dict[str, list[str]] = {
+    "law": ["adilet.zan.kz", "parlam.kz", "akorda.kz", "gov.kz", "zakon.kz"],
+    "number": ["stat.gov.kz", "nationalbank.kz", "gov.kz", *_INTERNATIONAL, "kapital.kz", "forbes.kz",
+               "kursiv.media", "kazinform.kz"],
+    "citation": [*_SCIENCE, "aclanthology.org", "who.int"],
 }
+TRUSTED_DEFAULT = [*_REFERENCE, *_KZ_OFFICIAL, *_INTERNATIONAL, *_SCIENCE, *_NEWS]
+
+
+def trusted_domains(claim_type: str) -> list[str]:
+    return TRUSTED_FOR_TYPE.get(claim_type, TRUSTED_DEFAULT)

@@ -1,22 +1,22 @@
-"""Shared HTTP layer: one async client, a small TTL cache, retries, and an SSRF-safe fetch."""
+"""Shared HTTP layer: one async client, a shared TTL cache, retries, and an SSRF-safe fetch."""
 
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import ipaddress
 import socket
-import time
 from typing import Any
 from urllib.parse import urlparse
 
 import httpx
 
+from . import store
 from .config import settings
 
 _client: httpx.AsyncClient | None = None
-_cache: dict[str, tuple[float, Any]] = {}
 _CACHE_TTL = 6 * 3600
-_CACHE_MAX = 2000
+WEEK = 7 * 86400   # for data that changes monthly or slower (Wikidata ids, monthly pageviews)
 
 
 def client() -> httpx.AsyncClient:
@@ -35,24 +35,23 @@ async def close() -> None:
     if _client is not None:
         await _client.aclose()
         _client = None
+    await store.close()
 
 
-def cache_get(key: str):
-    hit = _cache.get(key)
-    if hit and time.time() - hit[0] < _CACHE_TTL:
-        return hit[1]
-    return None
+def _cache_key(key: str) -> str:
+    return "senim:cache:" + hashlib.sha256(key.encode()).hexdigest()
 
 
-def cache_put(key: str, value: Any) -> None:
-    if len(_cache) >= _CACHE_MAX:
-        for k in sorted(_cache, key=lambda k: _cache[k][0])[: _CACHE_MAX // 10]:
-            _cache.pop(k, None)
-    _cache[key] = (time.time(), value)
+async def cache_get(key: str):
+    return await store.get(_cache_key(key))
+
+
+async def cache_put(key: str, value: Any, ttl: int = _CACHE_TTL) -> None:
+    await store.put(_cache_key(key), value, ttl)
 
 
 def cache_clear() -> None:
-    _cache.clear()
+    store.clear_memory()
 
 
 class HTTPError(Exception):
@@ -63,11 +62,29 @@ class HTTPError(Exception):
 
 
 async def get_json(url: str, params: dict | None = None, *, retries: int = 2, cache: bool = True,
-                   ok_statuses: tuple[int, ...] = (200,)) -> tuple[int, Any]:
+                   ok_statuses: tuple[int, ...] = (200,), cache_ttl: int = _CACHE_TTL) -> tuple[int, Any]:
     """GET a JSON API. Returns (status, json_or_None). 404-style statuses are returned, not raised."""
     key = f"GET {url} {sorted((params or {}).items())}"
-    if cache and (hit := cache_get(key)) is not None:
-        return hit
+    if not cache:
+        return await _fetch_json(key, url, params, retries, False, ok_statuses, cache_ttl)
+    if (hit := await cache_get(key)) is not None:
+        return hit[0], hit[1]
+    # Single flight: identical requests made at the same moment (two claims about the same entity)
+    # share one network call instead of each paying for it.
+    slot = (id(asyncio.get_running_loop()), key)
+    task = _inflight.get(slot)
+    if task is None:
+        task = asyncio.ensure_future(_fetch_json(key, url, params, retries, True, ok_statuses, cache_ttl))
+        _inflight[slot] = task
+        task.add_done_callback(lambda _: _inflight.pop(slot, None))
+    return await asyncio.shield(task)
+
+
+_inflight: dict[tuple[int, str], asyncio.Future] = {}
+
+
+async def _fetch_json(key: str, url: str, params: dict | None, retries: int, cache: bool,
+                      ok_statuses: tuple[int, ...], cache_ttl: int) -> tuple[int, Any]:
     delay = 1.0
     for attempt in range(retries + 1):
         try:
@@ -90,7 +107,7 @@ async def get_json(url: str, params: dict | None = None, *, retries: int = 2, ca
                 data = None
         result = (r.status_code, data)
         if cache and r.status_code in ok_statuses + (404,):
-            cache_put(key, result)
+            await cache_put(key, list(result), cache_ttl)
         return result
     raise HTTPError(0, url)
 
