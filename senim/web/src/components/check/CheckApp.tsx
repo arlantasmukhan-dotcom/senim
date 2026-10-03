@@ -100,7 +100,6 @@ export function CheckApp() {
       }
       if (!raw) return;
     }
-    if (!raw) return;
     const id = setTimeout(() => {
       let text: string;
       if (fromHash) {
@@ -111,7 +110,7 @@ export function CheckApp() {
         text = (JSON.parse(raw!) as { text: string }).text;
       }
       form.setValue("text", text);
-      startRef.current({ ...form.getValues(), text });
+      if (text.trim().length >= 20) startRef.current({ ...form.getValues(), text });
     }, 0);
     return () => clearTimeout(id);
   }, [form]);
