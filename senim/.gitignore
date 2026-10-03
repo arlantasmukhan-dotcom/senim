@@ -9,3 +9,7 @@ bench/out/
 .vercel
 .env*
 .env.local
+
+# local run outputs
+bot.log
+bench/out*/
