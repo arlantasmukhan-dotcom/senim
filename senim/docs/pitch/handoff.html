@@ -1,0 +1,236 @@
+<title>SENIM: пакет для презентации</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* Layout: one reading column; each new slide is a row (picture left, what to say right) that stacks on phones.
+     Light only, like the SENIM site and the slide pictures themselves. */
+  :root {
+    --bg: #f6f7f5; --surface: #fcfdfc; --well: #edf0ee;
+    --ink: #151a18; --ink-2: #3e4743; --muted: #5e6763; --line: #e1e5e2;
+    --brand: #0b6e4f; --brand-soft: #e3efe8; --brand-ink: #2e4a3e;
+    --warn: #8a4b12; --warn-soft: #fbf0e3; --bad: #a3271f;
+    --font: "Google Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font: 16px/1.55 var(--font); padding-inline: 16px; padding-block: 0 64px; }
+  .wrap { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 56px; }
+  h1, h2, h3 { text-wrap: balance; margin: 0; letter-spacing: -0.015em; }
+  h1 { font-size: clamp(30px, 5vw, 44px); line-height: 1.1; font-weight: 700; }
+  h2 { font-size: 26px; font-weight: 700; }
+  h3 { font-size: 20px; font-weight: 700; }
+  p { margin: 0; }
+  .eyebrow { font-size: 13px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--brand); }
+  a { color: var(--brand); }
+  :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+  header { padding-top: 48px; display: flex; flex-direction: column; gap: 14px; max-width: 760px; }
+  header .lead { font-size: 18px; color: var(--ink-2); }
+
+  /* score strip: where the jury took points */
+  .scores { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+  .score { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; }
+  .score b { font-size: 26px; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+  .score b small { font-size: 15px; color: var(--muted); font-weight: 500; }
+  .score span { font-size: 14px; color: var(--ink-2); }
+  .score .lost { color: var(--bad); font-weight: 500; font-size: 13px; }
+  .score.fixed { border-color: var(--brand); }
+  .score.fixed .lost, .score .lost.ok { color: var(--brand); }
+
+  section { display: flex; flex-direction: column; gap: 22px; }
+  .section-head { display: flex; flex-direction: column; gap: 6px; max-width: 760px; }
+  .section-head p { color: var(--ink-2); }
+
+  .slide { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 28px; background: var(--surface);
+           border: 1px solid var(--line); border-radius: 16px; padding: 24px; }
+  @media (max-width: 860px) { .slide { grid-template-columns: 1fr; padding: 16px; } }
+  .slide figure { margin: 0; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .slide img { width: 100%; border-radius: 10px; border: 1px solid var(--line); display: block; }
+  .slide figcaption { font-size: 13px; color: var(--muted); }
+  .slide figcaption code { font-size: 13px; background: var(--well); padding: 1px 6px; border-radius: 5px; }
+  .notes { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { font-size: 13px; font-weight: 500; padding: 4px 10px; border-radius: 999px; background: var(--well); color: var(--ink-2); }
+  .chip.crit { background: var(--brand-soft); color: var(--brand-ink); }
+  .say { background: var(--brand-soft); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+  .say .label { font-size: 13px; font-weight: 500; color: var(--brand-ink); }
+  .say p { color: var(--ink); }
+  .ask { border-left: 3px solid var(--line); padding-left: 14px; display: flex; flex-direction: column; gap: 4px; }
+  .ask .label { font-size: 13px; font-weight: 500; color: var(--muted); }
+  .ask p { font-size: 15px; color: var(--ink-2); }
+  button.copy { align-self: flex-start; font: 500 14px var(--font); color: var(--brand); background: var(--surface);
+                border: 1px solid var(--brand); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+  button.copy:hover { background: var(--brand); color: var(--surface); }
+
+  /* numbers */
+  .facts { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 8px 24px; }
+  .facts ul { list-style: none; margin: 0; padding: 0; }
+  .facts li { display: grid; grid-template-columns: minmax(110px, 180px) minmax(0, 1fr); gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .facts li:last-child { border-bottom: 0; }
+  .facts b { font-size: 20px; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+  .facts span { color: var(--ink-2); }
+  @media (max-width: 560px) { .facts li { grid-template-columns: 1fr; gap: 2px; } .facts { padding: 4px 16px; } }
+
+  /* extra material */
+  .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+  .gallery figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+  .gallery img { width: 100%; border-radius: 8px; border: 1px solid var(--line); display: block; }
+  .gallery b { font-size: 15px; }
+  .gallery figcaption { display: flex; flex-direction: column; gap: 2px; font-size: 14px; color: var(--ink-2); }
+  .gallery code { font-size: 12.5px; color: var(--muted); }
+
+  .careful { background: var(--warn-soft); border-radius: 16px; padding: 22px 24px; display: flex; flex-direction: column; gap: 12px; }
+  .careful h2 { color: var(--warn); font-size: 22px; }
+  .careful ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; color: var(--ink); }
+  .later { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .later div { background: var(--surface); border: 1px dashed var(--line); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 4px; }
+  .later span { color: var(--ink-2); font-size: 15px; }
+  footer { color: var(--muted); font-size: 14px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">SENIM · команда ReHub · WIT Teens Hackathon</div>
+    <h1>Пакет для презентации</h1>
+    <p class="lead">Жюри поставило 69 из 100. Больше всего баллов ушло на технологии, масштаб, данные и новизну. Ниже четыре готовых слайда, которые закрывают эти пункты, текст к каждому и цифры. Картинки можно вставлять в презентацию как есть: правый клик по картинке → «Сохранить изображение».</p>
+  </header>
+
+  <section aria-labelledby="scores-h">
+    <div class="section-head"><h2 id="scores-h">Где жюри сняло баллы</h2><p>Зелёная рамка: для этого критерия в пакете есть новый слайд.</p></div>
+    <div class="scores">
+      <div class="score"><b>15<small>/15</small></b><span>Понимание проблемы</span><span class="lost ok">максимум</span></div>
+      <div class="score"><b>17<small>/20</small></b><span>Качество решения</span><span class="lost">−3</span></div>
+      <div class="score fixed"><b>3<small>/10</small></b><span>Новизна</span><span class="lost">−7 · слайд «Сравнение»</span></div>
+      <div class="score"><b>9<small>/15</small></b><span>Польза для пользователя</span><span class="lost">−6</span></div>
+      <div class="score fixed"><b>7<small>/15</small></b><span>Эффект и масштаб</span><span class="lost">−8 · слайд «Масштаб»</span></div>
+      <div class="score fixed"><b>4<small>/10</small></b><span>Данные и технологии</span><span class="lost">−6 · слайды «Технологии» и «Данные»</span></div>
+      <div class="score"><b>9<small>/10</small></b><span>Презентация и демо</span><span class="lost">−1</span></div>
+      <div class="score"><b>5<small>/5</small></b><span>Соответствие кейсу</span><span class="lost ok">максимум</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="new-h">
+    <div class="section-head"><h2 id="new-h">Четыре слайда, которых не хватало</h2><p>Порядок в презентации: после слайда «Как работает» — Сравнение, Технологии, Масштаб, Данные.</p></div>
+
+    <article class="slide">
+      <figure><img src="compare.png" alt="Таблица: SENIM, ChatGPT с поиском и Google Fact Check Explorer по девяти возможностям" loading="lazy"><figcaption>Файл <code>compare.png</code></figcaption></figure>
+      <div class="notes">
+        <div class="meta"><span class="chip crit">Новизна · −7</span><span class="chip">слайд «Сравнение»</span></div>
+        <h3>Чем SENIM отличается от ChatGPT и Google Fact Check</h3>
+        <div class="say"><span class="label">Что сказать</span>
+          <p id="say-compare">ChatGPT отвечает и ищет, но сам себя не проверяет: даёт ссылку, но не сверяет цитату и может сам выдумать статью. Google Fact Check находит только то, что журналисты уже проверили, а новый ответ ИИ там не проверить. SENIM проверяет любой новый ответ ИИ, факт за фактом, с дословной цитатой из источника, и работает на казахском.</p>
+          <button class="copy" data-copy="say-compare" type="button">Скопировать текст</button></div>
+        <div class="ask"><span class="label">Перед выступлением</span><p>Откройте ChatGPT и Google Fact Check и проверьте строки таблицы: функции сервисов быстро меняются.</p></div>
+      </div>
+    </article>
+
+    <article class="slide">
+      <figure><img src="tech.png" alt="Слайд Технологии: 52 вызова модели стало 24, Википедия бесплатно, код правила каскада" loading="lazy"><figcaption>Файл <code>tech.png</code></figcaption></figure>
+      <div class="notes">
+        <div class="meta"><span class="chip crit">Технологии · −6 вместе с данными</span><span class="chip">слайд «Технологии»</span></div>
+        <h3>Каскад: дорогие проверки только там, где они что-то меняют</h3>
+        <div class="say"><span class="label">Что сказать</span>
+          <p id="say-tech">Сначала SENIM ищет источники. Если два надёжных источника уже подтвердили или опровергли факт, другие модели не опрашиваются: их ответ вердикт не изменит. Так на одну проверку уходит 24 вызова модели вместо 52. Википедию на трёх языках берём бесплатно, через её собственный API, а платный поиск тратим только на другие сайты.</p>
+          <button class="copy" data-copy="say-tech" type="button">Скопировать текст</button></div>
+        <div class="ask"><span class="label">Если спросят «откуда 52 и 24»</span><p>Это сценарий нагрузочного теста: ответ из 6 фактов, источники решили 4 из них. На других ответах экономия будет другой.</p></div>
+      </div>
+    </article>
+
+    <article class="slide">
+      <figure><img src="scale.png" alt="График: при 20 пользователях проверка занимает 26 секунд вместо 222; общий кэш, лимиты, бюджет" loading="lazy"><figcaption>Файл <code>scale.png</code></figcaption></figure>
+      <div class="notes">
+        <div class="meta"><span class="chip crit">Эффект и масштаб · −8</span><span class="chip">слайд «Масштаб»</span></div>
+        <h3>20 пользователей одновременно: 26 секунд вместо 222</h3>
+        <div class="say"><span class="label">Что сказать</span>
+          <p id="say-scale">Раньше все пользователи стояли в одной очереди к ИИ, и при 20 одновременных проверках каждый ждал почти четыре минуты. Теперь у каждой проверки свои слоты, и тот же сценарий занимает 26 секунд, а первый вердикт приходит через 10–13 секунд. Общий кэш помнит уже проверенное, лимиты не дают скрипту сжечь бюджет, а дневной потолок расходов страхует от неожиданных счетов.</p>
+          <button class="copy" data-copy="say-scale" type="button">Скопировать текст</button></div>
+        <div class="ask"><span class="label">Если спросят «это реальный замер?»</span><p>Конвейер SENIM настоящий, а задержки ответов ИИ и сайтов в тесте имитируются, чтобы замер не зависел от чужих серверов. Это написано на слайде.</p></div>
+      </div>
+    </article>
+
+    <article class="slide">
+      <figure><img src="dataset.png" alt="Слайд Данные: KazTruth-WD, 197 утверждений, примеры строк" loading="lazy"><figcaption>Файл <code>dataset.png</code></figcaption></figure>
+      <div class="notes">
+        <div class="meta"><span class="chip crit">Данные · −6 вместе с технологиями</span><span class="chip">слайд «Данные»</span></div>
+        <h3>KazTruth-WD: 197 утверждений о Казахстане из Wikidata</h3>
+        <div class="say"><span class="label">Что сказать</span>
+          <p id="say-data">Мы собрали собственный набор для проверки точности: 197 утверждений о Казахстане на казахском, русском и английском, из Wikidata. Правда — значение из Wikidata, ложь — то же утверждение с ошибкой, какую делает ИИ: соседний год, другой город. Есть знаменитые и редкие люди и организации, потому что на редких темах ИИ ошибается чаще всего. 79 утверждений отложены как экзамен: на них систему не настраивали.</p>
+          <button class="copy" data-copy="say-data" type="button">Скопировать текст</button></div>
+        <div class="ask"><span class="label">Если спросят «какая точность?»</span><p>Замер на этом наборе ещё не запускали. Не называйте старые «F1 = 1,00» на 20 примерах: система настраивалась на них же.</p></div>
+      </div>
+    </article>
+  </section>
+
+  <section aria-labelledby="facts-h">
+    <div class="section-head"><h2 id="facts-h">Цифры, которые можно называть</h2><p>Все проверены и есть на слайдах.</p></div>
+    <div class="facts"><ul>
+      <li><b>26 с вместо 222</b><span>ждёт каждый из 20 одновременных пользователей (нагрузочный тест, задержки ИИ имитируются)</span></li>
+      <li><b>10–13 с</b><span>до первого вердикта при 1–20 пользователях</span></li>
+      <li><b>24 вместо 52</b><span>вызова модели на одну проверку в том же сценарии</span></li>
+      <li><b>197 / 79</b><span>утверждений в KazTruth-WD / из них отложены для экзамена</span></li>
+      <li><b>kk · ru · en</b><span>три языка проверки и объяснений: 42 утверждения набора на казахском</span></li>
+      <li><b>8</b><span>мест в логике, где SENIM давал неверный вердикт, найдено и исправлено после ревью разработчика</span></li>
+      <li><b>79 тестов</b><span>автоматических проверок кода проходят</span></li>
+      <li><b>3 канала</b><span>сайт, Telegram-бот, расширение для Chrome</span></li>
+    </ul></div>
+  </section>
+
+  <section aria-labelledby="more-h">
+    <div class="section-head"><h2 id="more-h">Ещё материалы</h2><p>Для слайдов «Как работает», «Качество» и «Демо».</p></div>
+    <div class="gallery">
+      <figure><img src="flow.png" alt="Схема: пять шагов проверки и три канала" loading="lazy"><figcaption><b>Как работает SENIM</b>5 шагов и 3 канала<code>flow.png</code></figcaption></figure>
+      <figure><img src="quotelock.png" alt="Код Quote-Lock" loading="lazy"><figcaption><b>Quote-Lock</b>проверяющий ИИ не может выдумать цитату<code>quotelock.png</code></figcaption></figure>
+      <figure><img src="numbers.png" alt="Было и стало: сравнение чисел" loading="lazy"><figcaption><b>Числа по значению</b>было / стало, 4 реальных случая<code>numbers.png</code></figcaption></figure>
+      <figure><img src="stats.png" alt="Три большие цифры" loading="lazy"><figcaption><b>Три цифры</b>52 → 24, 222 → 26 с, Википедия бесплатно<code>stats.png</code></figcaption></figure>
+      <figure><img src="bot.png" alt="Макет сообщения Telegram-бота" loading="lazy"><figcaption><b>Telegram-бот</b>макет: текст настоящий, скриншот из Telegram будет позже<code>bot.png</code></figcaption></figure>
+      <figure><img src="screens.png" alt="Два скриншота сайта" loading="lazy"><figcaption><b>Сайт: два экрана</b>найденная ошибка и подтверждённый факт<code>screens.png</code></figcaption></figure>
+      <figure><img src="01_check_error.png" alt="Скриншот: найдена ошибка в годе рождения" loading="lazy"><figcaption><b>Скриншот: ошибка</b>исправление и цитата из источника<code>01_check_error.png</code></figcaption></figure>
+      <figure><img src="02_cascade_confirmed.png" alt="Скриншот: факт подтверждён без опроса других моделей" loading="lazy"><figcaption><b>Скриншот: каскад</b>«Не понадобилось: источники уже дали ответ»<code>02_cascade_confirmed.png</code></figcaption></figure>
+      <figure><img src="load.png" alt="График нагрузки с таблицей" loading="lazy"><figcaption><b>График нагрузки</b>вариант с таблицей значений<code>load.png</code></figcaption></figure>
+      <figure><img src="cascade.png" alt="Код правила каскада" loading="lazy"><figcaption><b>Код каскада</b>отдельно, крупнее<code>cascade.png</code></figcaption></figure>
+    </div>
+  </section>
+
+  <section class="careful" aria-labelledby="careful-h">
+    <h2 id="careful-h">Чтобы жюри не поймало на неточности</h2>
+    <ul>
+      <li>Нагрузочный тест: конвейер настоящий, задержки ИИ имитируются. Так и отвечать, если спросят.</li>
+      <li>Telegram-бот пока показан макетом. Текст сообщения настоящий, но не выдавайте картинку за скриншот из Telegram.</li>
+      <li>Точности SENIM на новом наборе пока нет. Старые «F1 = 1,00» не показывать как результат.</li>
+      <li>Таблицу сравнения перепроверить в день выступления.</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="later-h">
+    <div class="section-head"><h2 id="later-h">Будет позже</h2><p>Добавим в пакет, когда появятся ключи.</p></div>
+    <div class="later">
+      <div><b>Точность на KazTruth-WD</b><span>строка «SENIM против обычного ChatGPT» на слайд «Данные». Нужен рабочий ключ OpenRouter.</span></div>
+      <div><b>Скриншот бота из Telegram</b><span>заменит макет. Нужен токен бота от @BotFather.</span></div>
+    </div>
+  </section>
+
+  <footer>Сайт: senim-fawn.vercel.app · исходники всех картинок: docs/pitch/kit.html в репозитории</footer>
+</div>
+
+<script>
+  for (const btn of document.querySelectorAll("button.copy")) {
+    btn.addEventListener("click", async () => {
+      const el = document.getElementById(btn.dataset.copy);
+      const text = el.textContent.trim();
+      try {
+        await navigator.clipboard.writeText(text);
+        btn.textContent = "Скопировано";
+      } catch {
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        btn.textContent = "Выделено, нажмите Ctrl+C";
+      }
+      setTimeout(() => (btn.textContent = "Скопировать текст"), 2500);
+    });
+  }
+</script>

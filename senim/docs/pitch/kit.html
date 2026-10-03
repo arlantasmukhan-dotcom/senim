@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SENIM Pitch Kit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f5f3; --surface: #fcfcfb; --ink: #142019; --ink-2: #3c4a42; --muted: #6b7a71; --line: #dfe5e1;
+    --brand: #0B6E4F; --after: #087A53; --before: #C4864F; --bad: #B3261E; --bad-soft: #fbeceb; --good-soft: #e7f2ec;
+    --code-bg: #0f1a15; --code-ink: #dbe7e0; --kw: #7fd1ae; --str: #f0c08a; --com: #7d8f86; --fn: #a8c7ff; --num: #f2a7c3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0e1411; --surface: #151d19; --ink: #e8efeb; --ink-2: #c2cec7; --muted: #8fa097; --line: #26322c;
+      --brand: #3fb489; --after: #3fb489; --before: #d69a68; --bad: #f08a80; --bad-soft: #3a1f1d; --good-soft: #17322a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e1411; --surface: #151d19; --ink: #e8efeb; --ink-2: #c2cec7; --muted: #8fa097; --line: #26322c;
+    --brand: #3fb489; --after: #3fb489; --before: #d69a68; --bad: #f08a80; --bad-soft: #3a1f1d; --good-soft: #17322a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 Inter, system-ui, sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; display: flex; flex-direction: column; gap: 28px; }
+  h1 { font-size: 30px; margin: 0; letter-spacing: -0.02em; }
+  .intro { color: var(--ink-2); max-width: 760px; margin: 6px 0 0; }
+  .slide { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 40px 44px; }
+  .slide h2 { font-size: 28px; letter-spacing: -0.02em; margin: 0 0 6px; }
+  .slide .sub { color: var(--muted); margin: 0 0 26px; font-size: 16px; max-width: 900px; }
+  .tag { font: 600 12px/1 "JetBrains Mono", monospace; color: var(--brand); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 12px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  @media (max-width: 800px) { .grid2 { grid-template-columns: 1fr; } .slide { padding: 24px 18px; } }
+
+  /* chart */
+  .chart svg { width: 100%; height: auto; display: block; }
+  .legend { display: flex; gap: 22px; font-size: 14px; color: var(--ink-2); margin-bottom: 8px; }
+  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 8px; vertical-align: -1px; }
+  .axis text, .lbl { fill: var(--muted); font: 13px Inter, sans-serif; }
+  .val { fill: var(--ink); font: 600 13px Inter, sans-serif; }
+  .grid line { stroke: var(--line); }
+
+  /* stats */
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  @media (max-width: 800px) { .stats { grid-template-columns: 1fr; } }
+  .stat { border: 1px solid var(--line); border-radius: 16px; padding: 22px 24px; }
+  .stat .big { font: 600 44px/1.1 "JetBrains Mono", monospace; letter-spacing: -0.03em; color: var(--brand); }
+  .stat .big s { color: var(--muted); text-decoration-thickness: 2px; font-weight: 500; font-size: 30px; margin-right: 8px; }
+  .stat .cap { color: var(--ink-2); margin-top: 8px; font-size: 15px; }
+
+  /* code */
+  pre { margin: 0; background: var(--code-bg); color: var(--code-ink); border-radius: 14px; padding: 20px 22px;
+        font: 14px/1.6 "JetBrains Mono", monospace; overflow-x: auto; white-space: pre; }
+  .k { color: var(--kw); } .s { color: var(--str); } .c { color: var(--com); font-style: italic; } .f { color: var(--fn); } .n { color: var(--num); }
+  .codehead { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 10px; }
+  .codehead b { font-size: 15px; }
+  .pill { font: 600 12px/1 Inter, sans-serif; padding: 6px 10px; border-radius: 999px; }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); } .pill.good { background: var(--good-soft); color: var(--brand); }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 500; font-size: 13px; }
+  td.mono { font-family: "JetBrains Mono", monospace; font-size: 14px; }
+  .no { color: var(--bad); font-weight: 600; } .yes { color: var(--brand); font-weight: 600; }
+  table.cmp td, table.cmp th { font-size: 15px; padding: 12px 12px; }
+  table.cmp th:nth-child(2), table.cmp td:nth-child(2) { background: var(--good-soft); }
+  table.cmp th:nth-child(2) { color: var(--brand); font-weight: 700; font-size: 15px; border-radius: 10px 10px 0 0; }
+  table.cmp th { color: var(--ink); font-weight: 600; }
+  .part { color: var(--ink-2); } .mid { color: var(--muted); }
+  table.cmp td.no { font-weight: 500; } table.cmp td.yes { font-weight: 600; }
+
+  /* flow */
+  .flow { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; align-items: stretch; }
+  @media (max-width: 900px) { .flow { grid-template-columns: 1fr; } }
+  .step { border: 1px solid var(--line); border-radius: 14px; padding: 16px; position: relative; }
+  .step b { display: block; margin-bottom: 6px; }
+  .step p { margin: 0; color: var(--ink-2); font-size: 14px; }
+  .step.hot { border-color: var(--brand); background: var(--good-soft); }
+  .step .n { font: 600 12px "JetBrains Mono", monospace; color: var(--brand); display: block; margin-bottom: 8px; }
+  .channels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
+  @media (max-width: 800px) { .channels { grid-template-columns: 1fr; } }
+  .channel { border: 1px dashed var(--line); border-radius: 12px; padding: 12px 14px; font-size: 14px; color: var(--ink-2); }
+  .channel b { color: var(--ink); }
+
+  /* telegram mock */
+  .tg { background: #dfe8d6; border-radius: 16px; padding: 22px; }
+  .bubble { background: #fff; color: #111; border-radius: 14px 14px 14px 4px; padding: 12px 14px; max-width: 520px;
+            font: 15px/1.45 -apple-system, "Segoe UI", Inter, sans-serif; white-space: pre-wrap; box-shadow: 0 1px 1px rgba(0,0,0,.08); }
+  .bubble a { color: #2a7ab0; text-decoration: none; }
+  .bubble.me { background: #effdde; margin: 0 0 10px auto; border-radius: 14px 14px 4px 14px; }
+  .note { color: var(--muted); font-size: 13px; margin-top: 10px; }
+  .shot { width: 100%; border-radius: 12px; border: 1px solid var(--line); display: block; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>SENIM — материалы для презентации</h1>
+    <p class="intro">Команда ReHub · WIT Teens Hackathon. Каждый блок ниже — готовый слайд или его часть; PNG-версии лежат рядом в папке <code>docs/pitch/</code>.</p>
+  </header>
+
+  <!-- 1. How it works -->
+  <section class="slide" id="flow">
+    <div class="tag">Как работает</div>
+    <h2>Полиграф для ответов ИИ: каждый факт — на детектор</h2>
+    <p class="sub">Проверка начинается, пока ИИ ещё разбирает ответ. Дорогие датчики включаются, только если источников мало.</p>
+    <div class="flow">
+      <div class="step"><span class="n">01</span><b>Разбор на факты</b><p>Потоково: первый факт уходит на проверку, пока модель пишет остальные.</p></div>
+      <div class="step"><span class="n">02</span><b>Алиби + Известность</b><p>Источники kk/ru/en. Судья обязан дать дословную цитату (Quote-Lock).</p></div>
+      <div class="step hot"><span class="n">03</span><b>Каскад</b><p>Два надёжных источника согласны? Вердикт готов, другие модели не нужны.</p></div>
+      <div class="step"><span class="n">04</span><b>Допрос + Фантом</b><p>Только для спорных: 3 модели переспрашиваем, плюс контрольный вопрос о несуществующем «двойнике».</p></div>
+      <div class="step"><span class="n">05</span><b>Вердикт</b><p>✅ ❌ 🟠 по каждому факту сразу, с исправлением и источником.</p></div>
+    </div>
+    <div class="channels">
+      <div class="channel"><b>Сайт</b> · senim-fawn.vercel.app</div>
+      <div class="channel"><b>Telegram-бот</b> · переслал ответ ИИ — получил вердикты</div>
+      <div class="channel"><b>Расширение Chrome</b> · выделил ответ ChatGPT → «Проверить в SENIM»</div>
+    </div>
+  </section>
+
+  <!-- 2. Load test -->
+  <section class="slide" id="load">
+    <div class="tag">Масштабирование · нагрузочный тест</div>
+    <h2>20 пользователей одновременно: 26 секунд вместо 222</h2>
+    <p class="sub">Полная проверка ответа из 6 фактов, медиана. Конвейер SENIM настоящий, задержки моделей и сайтов имитируются (python -m bench.load_test).</p>
+    <div class="legend"><span><i style="background:var(--before)"></i>До: один общий пул на всех, все датчики всегда</span><span><i style="background:var(--after)"></i>После: свои слоты у каждой проверки + каскад</span></div>
+    <div class="chart" id="loadChart"></div>
+    <table style="margin-top:14px" aria-label="Данные графика">
+      <tr><th>Пользователей</th><th>До</th><th>После: первый вердикт</th><th>После: вся проверка</th></tr>
+      <tr><td>1</td><td>20 с</td><td>10 с</td><td>16 с</td></tr>
+      <tr><td>5</td><td>60 с</td><td>10 с</td><td>16 с</td></tr>
+      <tr><td>10</td><td>113 с</td><td>10 с</td><td>17 с</td></tr>
+      <tr><td>20</td><td>222 с</td><td>13 с</td><td>26 с</td></tr>
+    </table>
+  </section>
+
+  <!-- 3. Stats -->
+  <section class="slide" id="stats">
+    <div class="tag">Эффективность</div>
+    <h2>Быстрее и дешевле при той же функциональности</h2>
+    <p class="sub">Тот же сценарий нагрузочного теста.</p>
+    <div class="stats">
+      <div class="stat"><div class="big"><s>52</s>24</div><div class="cap">вызова модели на проверку: каскад не опрашивает другие ИИ, когда источники уже решили</div></div>
+      <div class="stat"><div class="big"><s>222</s>26 с</div><div class="cap">ждёт каждый из 20 одновременных пользователей</div></div>
+      <div class="stat"><div class="big">2 → 0</div><div class="cap">платных поиска по Википедии: её берём бесплатно через её API, Tavily ищет только другие сайты</div></div>
+    </div>
+  </section>
+
+  <!-- 4. Numbers bug -->
+  <section class="slide" id="numbers">
+    <div class="tag">Качество · логика</div>
+    <h2>Числа сравниваются по значению, а не как строки</h2>
+    <p class="sub">Раньше SENIM мог назвать верный факт ошибкой только из-за формата записи числа.</p>
+    <div class="grid2">
+      <div>
+        <div class="codehead"><b>Было</b><span class="pill bad">«2,700,000» опровергает «2,7 млн»</span></div>
+<pre><span class="k">def</span> <span class="f">numbers</span>(text):
+    <span class="c"># "2,7 млн"   → {"2.7"}</span>
+    <span class="c"># "2,700,000" → {"2.700", "000"}</span>
+    <span class="k">return</span> {n.replace(<span class="s">","</span>, <span class="s">"."</span>)
+            <span class="k">for</span> n <span class="k">in</span> re.findall(<span class="s">r"\d+([.,]\d+)?"</span>, text)}</pre>
+      </div>
+      <div>
+        <div class="codehead"><b>Стало</b><span class="pill good">значение ± округление</span></div>
+<pre><span class="k">def</span> <span class="f">same_number</span>(a: Num, b: Num) -> bool:
+    <span class="c">"""2,7 млн = 2 700 000 = 2 683 000"""</span>
+    <span class="k">return</span> abs(a.value - b.value) <= \
+           max(a.step, b.step) / <span class="n">2</span>
+
+quantities(<span class="s">"2,7 млн"</span>)    <span class="c"># 2 700 000 ± 50 000</span>
+quantities(<span class="s">"10.08.1845"</span>) <span class="c"># 10, 8, 1845 (дата)</span></pre>
+      </div>
+    </div>
+    <table style="margin-top:18px">
+      <tr><th>Утверждение ИИ</th><th>Ответ другой модели</th><th>Было</th><th>Стало</th></tr>
+      <tr><td>2,7 млн человек</td><td class="mono">2,700,000 people</td><td class="no">опровергает</td><td class="yes">подтверждает</td></tr>
+      <tr><td>20,000</td><td class="mono">20 000</td><td class="no">разные числа</td><td class="yes">одно число</td></tr>
+      <tr><td>родился в 1845</td><td class="mono">прожил 59 лет</td><td class="no">опровергает</td><td class="yes">не сравнимо → решает ИИ-классификатор</td></tr>
+      <tr><td>10 августа 1845</td><td class="mono">10.08.1845</td><td class="no">опровергает (10.08)</td><td class="yes">подтверждает</td></tr>
+    </table>
+  </section>
+
+  <!-- 5. Cascade code -->
+  <section class="slide" id="cascade">
+    <div class="tag">Технологии · каскад</div>
+    <h2>Дорогие датчики — только там, где они что-то меняют</h2>
+    <p class="sub">Правило в коде прозрачно: одна функция, её можно прочитать и проверить.</p>
+<pre><span class="k">def</span> <span class="f">decided_by_sources</span>(alibi) -> bool:
+    <span class="c"># Факт уже решён источниками: допрос других моделей не изменит вердикт</span>
+    <span class="k">if</span> alibi.contradict_domains:
+        <span class="k">return</span> (alibi.contradict_tier12                 <span class="c"># есть надёжный опровергающий</span>
+                <span class="k">and</span> len(alibi.contradict_domains) >= <span class="n">2</span>  <span class="c"># и он не один</span>
+                <span class="k">and not</span> alibi.support_domains)          <span class="c"># и никто не подтверждает</span>
+    trusted = any(e.locked <span class="k">and</span> e.stance == <span class="s">"supports"</span> <span class="k">and</span> e.tier <= <span class="n">2</span>
+                  <span class="k">for</span> e <span class="k">in</span> alibi.evidence)
+    <span class="k">return</span> trusted <span class="k">and</span> support_score(alibi) >= <span class="n">2</span> / <span class="n">3</span>        <span class="c"># ≈ два надёжных источника</span></pre>
+  </section>
+
+  <!-- 6. Quote-Lock -->
+  <section class="slide" id="quotelock">
+    <div class="tag">Новизна · Quote-Lock</div>
+    <h2>Проверяющий ИИ не может выдумать доказательство</h2>
+    <p class="sub">Любая цитата судьи сверяется с текстом страницы. Нет на странице — доказательство выбрасывается, что бы ни сказал ИИ.</p>
+<pre><span class="k">def</span> <span class="f">quote_lock</span>(quote: str, page_text: str, min_len: int = <span class="n">12</span>) -> bool:
+    <span class="c">"""True только если цитата дословно есть на странице."""</span>
+    q = normalize(quote).strip(<span class="s">" .\"'"</span>)
+    <span class="k">if</span> len(q) < min_len:
+        <span class="k">return False</span>
+    <span class="k">return</span> q <span class="k">in</span> normalize(page_text)</pre>
+  </section>
+
+  <!-- 7. Dataset -->
+  <section class="slide" id="dataset">
+    <div class="tag">Данные · KazTruth-WD</div>
+    <h2>197 утверждений о Казахстане, собранных из Wikidata</h2>
+    <p class="sub">Правда — значение из Wikidata (ссылка на запись в каждой строке). Ложь — то же утверждение с ошибкой, какую делает ИИ: соседний год, другой город. 79 утверждений отложены как тест: на них систему не настраивают.</p>
+    <div class="stats" style="margin-bottom:20px">
+      <div class="stat"><div class="big">197</div><div class="cap">утверждений · ru 95 · kk 42 · en 60</div></div>
+      <div class="stat"><div class="big">74</div><div class="cap">редких сущностей — там ИИ ошибается чаще всего (ещё 74 известных и 49 знаменитых)</div></div>
+      <div class="stat"><div class="big">79</div><div class="cap">утверждений в отложенном тесте</div></div>
+    </div>
+    <table>
+      <tr><th>Утверждение</th><th>Язык</th><th>Известность</th><th>Метка</th><th>Wikidata</th></tr>
+      <tr><td>Галина Воскобоева родилась в 1981 году.</td><td>ru</td><td>знаменитая</td><td class="no">ложь</td><td class="mono">1984</td></tr>
+      <tr><td>Сұлтанғазин Өмірзақ Махмұтұлы 2005 жылы қайтыс болған.</td><td>kk</td><td>известный</td><td class="yes">правда</td><td class="mono">2005</td></tr>
+      <tr><td>Сабина Аширбаева родилась в городе Жезказган.</td><td>ru</td><td>редкая</td><td class="no">ложь</td><td class="mono">Шымкент</td></tr>
+      <tr><td>FC Dinamo Almaty was founded in 1937.</td><td>en</td><td>известный</td><td class="yes">правда</td><td class="mono">1937</td></tr>
+      <tr><td>Уки Ажиевич Ажиев умер в 2014 году.</td><td>ru</td><td>редкий</td><td class="no">ложь</td><td class="mono">2015</td></tr>
+    </table>
+  </section>
+
+  <!-- 8. Bot -->
+  <section class="slide" id="bot">
+    <div class="tag">Пользовательская ценность · Telegram</div>
+    <h2>Переслал ответ ИИ — получил вердикт по каждому факту</h2>
+    <p class="sub">Одно сообщение обновляется по мере готовности вердиктов. Язык — казахский, русский или английский, по настройкам Telegram.</p>
+    <div class="tg">
+      <div class="bubble me">Абай Кунанбаев родился в 1847 году в Чингизских горах. Он умер в 1904 году. Об этом пишет статья Seitkali, 2021, doi:10.5555/senim.fake.2021.</div>
+      <div class="bubble"><b>❌ Ошибка</b>: Абай Кунанбаев родился в 1847 году.
+✏️ Правильно: Абай Кунанбаев родился в 1845 году.
+📎 <a href="#">Источник</a>: «Абай Кунанбаев (10 августа 1845 года — 6 июля 1904 года)»
+
+<b>✅ Подтверждается</b>: Абай Кунанбаев умер в 1904 году.
+📎 <a href="#">Источник</a>: «6 июля 1904 года) — казахский поэт»</div>
+    </div>
+    <p class="note">Макет экрана: текст сообщения — настоящий вывод бота (senim/bot.py) на демо-примере. Скриншот из Telegram сделаем после запуска бота.</p>
+  </section>
+
+  <!-- 10. Technology (one slide) -->
+  <section class="slide" id="tech">
+    <div class="tag">Технологии</div>
+    <h2>Каскад: дорогие проверки — только там, где они что-то меняют</h2>
+    <p class="sub">Сначала источники. Если два надёжных источника уже решили факт, другие модели не опрашиваются: их ответ вердикт не изменит.</p>
+    <div class="stats" style="margin-bottom:22px">
+      <div class="stat"><div class="big"><s>52</s>24</div><div class="cap">вызова модели на проверку (−54%) в сценарии нагрузочного теста</div></div>
+      <div class="stat"><div class="big">0 ₸</div><div class="cap">за Википедию: kk/ru/en берём через её бесплатный API, платный поиск Tavily тратим только на другие сайты</div></div>
+      <div class="stat"><div class="big">1 раз</div><div class="cap">одинаковые запросы, сделанные одновременно, уходят в сеть один раз</div></div>
+    </div>
+<pre><span class="k">def</span> <span class="f">decided_by_sources</span>(alibi) -> bool:
+    <span class="k">if</span> alibi.contradict_domains:                        <span class="c"># опровергают:</span>
+        <span class="k">return</span> (alibi.contradict_tier12                    <span class="c">#   надёжный источник,</span>
+                <span class="k">and</span> len(alibi.contradict_domains) >= <span class="n">2</span>     <span class="c">#   не один,</span>
+                <span class="k">and not</span> alibi.support_domains)             <span class="c">#   и никто не подтверждает</span>
+    <span class="k">return</span> trusted_support <span class="k">and</span> support_score(alibi) >= <span class="n">2</span> / <span class="n">3</span>  <span class="c"># подтверждают ≈ 2 надёжных</span></pre>
+  </section>
+
+  <!-- 11. Scale (one slide) -->
+  <section class="slide" id="scale">
+    <div class="tag">Масштабирование</div>
+    <h2>20 пользователей одновременно: 26 секунд вместо 222</h2>
+    <p class="sub">Полная проверка ответа из 6 фактов, медиана. Конвейер SENIM настоящий, задержки моделей и сайтов имитируются (bench/load_test.py).</p>
+    <div class="legend"><span><i style="background:var(--before)"></i>До: один общий пул на всех, все датчики всегда</span><span><i style="background:var(--after)"></i>После: свои слоты у каждой проверки + каскад</span></div>
+    <div class="chart" id="scaleChart"></div>
+    <div class="stats" style="margin-top:18px">
+      <div class="stat"><div class="big" style="font-size:30px;font-family:Inter,sans-serif;font-weight:700;letter-spacing:-0.02em">Общий кэш</div><div class="cap">Upstash Redis: все копии сервера помнят уже проверенное, данные Википедии хранятся неделю</div></div>
+      <div class="stat"><div class="big" style="font-size:30px;font-family:Inter,sans-serif;font-weight:700;letter-spacing:-0.02em">Лимиты</div><div class="cap">20 проверок в час с одного IP или аккаунта Telegram: скрипт не сожжёт бюджет</div></div>
+      <div class="stat"><div class="big" style="font-size:30px;font-family:Inter,sans-serif;font-weight:700;letter-spacing:-0.02em">Бюджет</div><div class="cap">дневной потолок расходов на модели: при достижении сервер вежливо отказывает до завтра</div></div>
+    </div>
+  </section>
+
+  <!-- 12. Competitors -->
+  <section class="slide" id="compare">
+    <div class="tag">Новизна · сравнение</div>
+    <h2>Чем SENIM отличается от ChatGPT и Google Fact Check</h2>
+    <p class="sub">ChatGPT отвечает и ищет, но сам себя не проверяет. Google Fact Check находит только то, что журналисты уже проверили. SENIM проверяет любой новый ответ ИИ — факт за фактом, с доказательствами.</p>
+    <table class="cmp">
+      <tr><th style="width:44%"></th><th>SENIM</th><th>ChatGPT с поиском</th><th>Google Fact Check Explorer</th></tr>
+      <tr><td>Проверяет любой новый ответ ИИ</td><td class="yes">✓</td><td class="part">если попросить</td><td class="no">✗ только уже проверенные журналистами утверждения</td></tr>
+      <tr><td>Вердикт по каждому факту отдельно</td><td class="yes">✓</td><td class="part">без структуры</td><td class="no">✗</td></tr>
+      <tr><td>Цитата из источника сверяется со страницей дословно (Quote-Lock)</td><td class="yes">✓</td><td class="no">✗ ссылка без проверки цитаты</td><td class="mid">—</td></tr>
+      <tr><td>Проверяет, существуют ли статьи и DOI в ответе</td><td class="yes">✓ doi.org, Crossref, OpenAlex, Интернет-архив</td><td class="no">✗</td><td class="no">✗</td></tr>
+      <tr><td>Независимые «свидетели» — другие ИИ-модели</td><td class="yes">✓ 3 семейства моделей</td><td class="no">✗ одна модель</td><td class="mid">—</td></tr>
+      <tr><td>Контрольный вопрос о несуществующем «двойнике»</td><td class="yes">✓</td><td class="no">✗</td><td class="no">✗</td></tr>
+      <tr><td>Казахский язык и источники Казахстана (adilet, stat.gov.kz, e-history)</td><td class="yes">✓ kk / ru / en</td><td class="part">язык — да, приоритета источников нет</td><td class="part">зависит от редакций</td></tr>
+      <tr><td>Показывает, почему такой вердикт (вклад каждого датчика)</td><td class="yes">✓</td><td class="no">✗</td><td class="part">статья редакции</td></tr>
+      <tr><td>Где работает</td><td class="yes">сайт, Telegram, расширение</td><td class="part">в своём чате</td><td class="part">сайт поиска</td></tr>
+    </table>
+    <p class="note">Сравнение по возможностям сервисов на октябрь 2026; перед выступлением перепроверьте актуальные функции ChatGPT и Google.</p>
+  </section>
+
+  <!-- 9. Screenshots -->
+  <section class="slide" id="screens">
+    <div class="tag">Демо</div>
+    <h2>Сайт: ошибка найдена, источник с цитатой, исправление</h2>
+    <p class="sub">Слева — ошибка в годе рождения, справа — факт, который источники подтвердили без опроса других моделей.</p>
+    <div class="grid2">
+      <img class="shot" src="01_check_error.png" alt="Карточка ошибки: год рождения Абая">
+      <img class="shot" src="02_cascade_confirmed.png" alt="Карточка подтверждённого факта: допрос не понадобился">
+    </div>
+  </section>
+</main>
+
+<script>
+  // Grouped bars: full check time, before vs after, per number of simultaneous users.
+  const data = [[1, 20.3, 15.8], [5, 60.1, 15.8], [10, 113.1, 17.4], [20, 222.3, 25.6]];
+  const W = 1100, H = 380, m = { l: 56, r: 16, t: 24, b: 44 };
+  const max = 240, iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const y = (v) => m.t + ih - (v / max) * ih;
+  const group = iw / data.length, bw = Math.min(64, group * 0.28), gap = 2;
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Время полной проверки: до и после">`;
+  svg += `<g class="grid">`;
+  for (let v = 0; v <= max; v += 60) svg += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}"/>`;
+  svg += `</g><g class="axis">`;
+  for (let v = 0; v <= max; v += 60) svg += `<text x="${m.l - 10}" y="${y(v) + 4}" text-anchor="end">${v} с</text>`;
+  svg += `</g>`;
+  const bar = (x, v, color) => {
+    const top = y(v), h = m.t + ih - top, r = Math.min(4, h);
+    return `<path d="M${x},${m.t + ih} V${top + r} Q${x},${top} ${x + r},${top} H${x + bw - r} Q${x + bw},${top} ${x + bw},${top + r} V${m.t + ih} Z" fill="${color}"/>`;
+  };
+  data.forEach(([users, before, after], i) => {
+    const cx = m.l + group * i + group / 2;
+    const xb = cx - bw - gap / 2, xa = cx + gap / 2;
+    svg += bar(xb, before, "var(--before)") + bar(xa, after, "var(--after)");
+    svg += `<text class="val" x="${xb + bw / 2}" y="${y(before) - 8}" text-anchor="middle">${Math.round(before)}</text>`;
+    svg += `<text class="val" x="${xa + bw / 2}" y="${y(after) - 8}" text-anchor="middle">${Math.round(after)}</text>`;
+    svg += `<text class="lbl" x="${cx}" y="${H - 16}" text-anchor="middle">${users} ${users === 1 ? "пользователь" : users < 5 ? "пользователя" : "пользователей"}</text>`;
+  });
+  svg += `<line x1="${m.l}" x2="${W - m.r}" y1="${m.t + ih}" y2="${m.t + ih}" stroke="var(--muted)"/></svg>`;
+  for (const id of ["loadChart", "scaleChart"]) { const el = document.getElementById(id); if (el) el.innerHTML = svg; }
+</script>
+</body>
+</html>
